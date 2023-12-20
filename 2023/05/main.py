@@ -1,6 +1,6 @@
 from typing import NamedTuple
 
-file_name = "input.txt"
+file_name = "input-test.txt"
 with open(file_name) as file:
     lines = [line.rstrip() for line in file]
 
@@ -117,3 +117,46 @@ def get_map_group_min(seeds: list[int], seed_to_soil: list[SeedMap], soil_to_fer
     return min(locations)
 
 print(f"{get_map_group_min(seeds, seed_to_soil, soil_to_fertilizer, fertilizer_to_water, water_to_light, light_to_temperature, temperature_to_humidity, humidity_to_location)=}")
+
+new_seed_ranges: list[tuple[int, int]] = []
+for i in range(0, len(seeds), 2):
+    new_seed_ranges.append((seeds[i], seeds[i] + seeds[i+1] - 1))
+
+new_seed_ranges=[(79, 92), (55, 150)]
+print(f"{new_seed_ranges=}")
+
+new_seed_to_soil = [(x.source_start, x.source_start + x.range - 1) for x in seed_to_soil]
+new_seed_to_soil=[(98, 99), (50, 95)]
+print(f"{new_seed_to_soil=}")
+
+# new_soil_to_fertilizer = [(x.source_start, x.source_start + x.range - 1) for x in soil_to_fertilizer]
+# print(f"{new_soil_to_fertilizer=}")
+# new_soil_to_fertilizer=[(15, 51), (52, 53), (0, 14)]
+
+result = [(79, 92), (55, 95), (96, 97), (98, 99), (100, 150)]
+
+split_seed_ranges = []
+for seed in new_seed_ranges:
+    for soil_map in new_seed_to_soil:
+        if seed[0] <= soil_map[0] <= seed[1]:
+            split_seed_ranges.append(soil_map[0])
+        if seed[0] <= soil_map[1] <= seed[1]:
+            split_seed_ranges.append(soil_map[1])
+
+
+print(split_seed_ranges)
+
+# seed  soil
+# 0     0
+# 1     1
+# ...   ...
+# 48    48
+# 49    49
+# 50    52
+# 51    53
+# ...   ...
+# 96    98
+# 97    99
+# 98    50
+# 99    51
+
