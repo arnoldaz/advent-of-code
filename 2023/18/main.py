@@ -1,8 +1,7 @@
-import sys
 from typing import NamedTuple
 from enum import Enum
 
-file_name = "input-test.txt"
+file_name = "input.txt"
 with open(file_name) as file:
     lines = [line.rstrip() for line in file]
 
@@ -57,6 +56,25 @@ for line in lines:
     
     dig_steps.append(DigStep(direction, amount, rgb))
 
+new_dig_steps: list[DigStep] = []
+
+for step in dig_steps:
+    hex_string = step.rgb[:-1]
+    distance = int(hex_string, 16)
+    match step.rgb[-1]:
+        case "0":
+            direction = Direction.Right
+        case "1":
+            direction = Direction.Down
+        case "2":
+            direction = Direction.Left
+        case "3":
+            direction = Direction.Up
+        case _:
+            direction = Direction.No
+    
+    new_dig_steps.append(DigStep(direction, distance, ""))
+
 def create_2d_map(steps: list[DigStep], positive_width: int, positive_height: int, negative_width: int, negative_height: int) -> list[str]:
     map = [[["."] for _ in range(positive_width - negative_width + 1)] for _ in range(positive_height - negative_height + 1)]
     
@@ -85,201 +103,192 @@ def create_2d_map(steps: list[DigStep], positive_width: int, positive_height: in
     
     return ["".join("".join(single_char_list) for single_char_list in line) for line in map]
 
-# print(f"{width=} {height=} {min_width=} {min_height=}")
+# Debugging code for visualization
+# map = create_2d_map(dig_steps, width, height, min_width, min_height)
+# with open("map-" + file_name, "w") as file:
+#     for line in map:
+#         file.write(line + "\n")
 
-map = create_2d_map(dig_steps, width, height, min_width, min_height)
-with open("map-" + file_name, "w") as file:
-    for line in map:
-        file.write(line + "\n")
+class Point:
+    x: float
+    y: float
+    z: float
 
-def flood_fill(matrix, row, col, fill_char, boundary_char):
-    if row < 0 or row >= len(matrix) or col < 0 or col >= len(matrix[0]) or matrix[row][col] != ".":
-        return
+    def __init__(self, x: float = 0, y: float = 0, z: float = 0):
+        self.x = x
+        self.y = y
+        self.z = z
 
-    matrix[row][col] = fill_char
+    def __str__(self):
+        return f"{{Point: x={self.x}, y={self.y}, z={self.z}}}"
 
-    flood_fill(matrix, row + 1, col, fill_char, boundary_char)  # Down
-    flood_fill(matrix, row - 1, col, fill_char, boundary_char)  # Up
-    flood_fill(matrix, row, col + 1, fill_char, boundary_char)  # Right
-    flood_fill(matrix, row, col - 1, fill_char, boundary_char)  # Left
+    def __repr__(self):
+        return self.__str__()
 
-def find_cells_inside_polygon(matrix, inside_row, inside_col):
-    fill_char = "#" 
-    boundary_char = "#"
-
-    flood_fill(matrix, inside_row, inside_col, fill_char, boundary_char)
-
-def check_inside(x: int, y: int, map: list[str]) -> bool:
-    line = map[y]
-    
-    horizontal_walls: list[int] = []
-    for i, char in enumerate(line):
-        if char == "#" and (i == 0 or line[i-1] != "#"):
-            horizontal_walls.append(i)
-
-    left_counter = 0
-    for wall in horizontal_walls:
-        if wall < x:
-            left_counter += 1
-    
-    return left_counter % 2 == 1
-    
-    # line = map[y]
-    
-    # horizontal_wall_left = sys.maxsize
-    # horizontal_wall_right = -1
-    # for i, char in enumerate(line):
-    #     if char == "#":
-    #         if i < horizontal_wall_left:
-    #             horizontal_wall_left = i
-    #         if i > horizontal_wall_right:
-    #             horizontal_wall_right = i
-    
-    # if not horizontal_wall_left < x < horizontal_wall_right:
-    #     return False
-    
-    # column = ["".join(line[x]) for line in map]
-    # vertical_wall_up = sys.maxsize
-    # vertical_wall_down = -1
-    # for i, char in enumerate(column):
-    #     if char == "#":
-    #         if i < vertical_wall_up:
-    #             vertical_wall_up = i
-    #         if i > vertical_wall_down:
-    #             vertical_wall_down = i
-    
-    # if not vertical_wall_up < y < vertical_wall_down:
-    #     return False
-    
-    return True
-
-# filled_map = [[["."] for _ in range(width - min_width + 1)] for _ in range(height - min_height + 1)]
-# filled_count = 0
-# for y, line in enumerate(map):
-#     for x, char in enumerate(line):
-#         if char == "#" or check_inside(x, y, map):
-#             filled_count += 1
-#             filled_map[y][x][0] = "#"
-
-inside_row = -1
-inside_col = -1
-
-for y, line in enumerate(map):
-    for x, char in enumerate(line):
-        if char == "." and check_inside(x, y, map):
-            inside_row = y
-            inside_col = x
-            break
-    if inside_col != -1:
-        break
-
-print(f"{inside_row=} {inside_col=}")
-
-sys.setrecursionlimit(1_000_000)
-
-matrix = [list(row) for row in map]
-find_cells_inside_polygon(matrix, 50, 300)
-
-
-
-filled_map = ["".join("".join(single_char_list) for single_char_list in line) for line in matrix]
-with open("map-filled-" + file_name, "w") as file:
-    for line in filled_map:
-        file.write(line + "\n")
-
-filled_count = 0
-for line in filled_map:
-    for char in line:
-        if char == "#":
-            filled_count += 1
-
-print(f"{filled_count=}")
-
-#####################################################################
-
-test_vertices = [(0, 0), (10, 0), (10, -20), (0, -20)]
-
-test_vertices = [(-1, 0), (-1, -1), (-1, -0.99), (-2, -1), (-2, 1), (-1, 0.99), (-1, 1)]
-
-def shoelace_area(vertices):
+def shoelace_area(vertices: list[Point]) -> float:
     n = len(vertices)
     area = 0
     for i in range(n):
         j = (i + 1) % n
-        area += vertices[i][0] * vertices[j][1]
-        area -= vertices[j][0] * vertices[i][1]
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
     area = abs(area) / 2
     return area
 
-area = shoelace_area(test_vertices)
-print(f"{area=}")
-
-new_dig_steps: list[DigStep] = []
-
-for step in dig_steps:
-    hex_string = step.rgb[:-1]
-    distance = int(hex_string, 16)
-    match step.rgb[-1]:
-        case "0":
-            direction = Direction.Right
-        case "1":
-            direction = Direction.Down
-        case "2":
-            direction = Direction.Left
-        case "3":
-            direction = Direction.Up
-        case _:
-            direction = Direction.No
-    
-    new_dig_steps.append(DigStep(direction, distance, ""))
-
-# start = (0, 0)
-# vertices = [start]
-# current_node = start
-
-# for step in new_dig_steps:
-#     match step.direction:
-#         case Direction.Right:
-#             current_node = (current_node[0] + step.amount, current_node[1])
-#         case Direction.Left:
-#             current_node = (current_node[0] - step.amount, current_node[1])
-#         case Direction.Up:
-#             current_node = (current_node[0], current_node[1] - step.amount)
-#         case Direction.Down:
-#             current_node = (current_node[0], current_node[1] + step.amount)
-
-#     vertices.append(current_node)
-
-# print(vertices)
-# new_area = shoelace_area(vertices)
-# print(f"{new_area=}")
-
-###
-
-start = (0, 0)
-vertices = [start]
-current_node = start
-
-
-for step in dig_steps:
-    match step.direction:
+def invert_direction(direction: Direction) -> Direction:
+    match direction:
         case Direction.Right:
-            current_node = (current_node[0] + step.amount + 1, current_node[1])
+            return Direction.Left
         case Direction.Left:
-            current_node = (current_node[0] - step.amount, current_node[1])
+            return Direction.Right
         case Direction.Up:
-            current_node = (current_node[0], current_node[1] - step.amount)
+            return Direction.Down
         case Direction.Down:
-            current_node = (current_node[0], current_node[1] + step.amount + 1)
+            return Direction.Up
+        case Direction.No:
+            return Direction.No
 
-    vertices.append(current_node)
+def get_vertices(steps: list[DigStep]) -> list[Point]:
+    is_counter_clockwise = False
+    first_step = steps[0]
+    second_step = steps[1]
 
-print(vertices)
-new_area = shoelace_area(vertices)
-print(f"{new_area=}")
+    match first_step.direction:
+        case Direction.Right:
+            start = Point(0.5, 0)
+        case Direction.Left:
+            start = Point(-0.5, 0)
+        case Direction.Up:
+            start = Point(0, -0.5)
+        case Direction.Down:
+            start = Point(0, 0.5)
+        case Direction.No:
+            raise Exception("No starting direction")
+
+    vertices = [start]
+    current_node = start
+    previous_direction = Direction.No
+
+    match first_step.direction, second_step.direction:
+        case Direction.Right, Direction.Down:
+            is_counter_clockwise = False
+        case Direction.Down, Direction.Left:
+            is_counter_clockwise = False
+        case Direction.Left, Direction.Up:
+            is_counter_clockwise = False
+        case Direction.Up, Direction.Right:
+            is_counter_clockwise = False
+        case Direction.Right, Direction.Up:
+            is_counter_clockwise = True
+        case Direction.Down, Direction.Right:
+            is_counter_clockwise = True
+        case Direction.Left, Direction.Down:
+            is_counter_clockwise = True
+        case Direction.Up, Direction.Left:
+            is_counter_clockwise = True
+        case _:
+            print(f"Weird starting directions - {first_step.direction} {second_step.direction}")
 
 
-# normal [(0, 0), (6, 0), (6, 5), (4, 5), (4, 7), (6, 7), (6,  9), (1,  9), (1,  7), ( 0,  7), ( 0,  5), (2,  5), (2, 2), ( 0, 2), ( 0,  0)]
-# + -    [(0, 0), (7, 0), (7, 6), (4, 6), (4, 9), (7, 9), (7, 12), (1, 12), (1,  9), (-1,  9), (-1,  6), (2,  6), (2, 2), (-1, 2), (-1, -1)]
-# + +    [(0, 0), (7, 0), (7, 6), (6, 6), (6, 9), (9, 9), (9, 12), (5, 12), (5, 11), ( 5, 11), ( 5, 10), (8, 10), (8, 8), ( 7, 8), ( 7,  7)]
-# goal   [(0, 0), (7, 0), (7, 6), (5, 6), (5, 7), (7, 7), (7, 10), (1, 10), (1,  8), ( 0,  8), ( 0,  5), (2,  5), (2, 3), ( 0, 3), ( 0,  0)]
+    for step in steps:
+        if is_counter_clockwise:
+            direction = invert_direction(step.direction)
+        else:
+            direction = step.direction 
+
+        match direction:
+            case Direction.Right:
+                match previous_direction:
+                    case Direction.Right:
+                        pass
+                    case Direction.Left:
+                        print("Shouldn't be possible to go from LEFT to RIGHT")
+                    case Direction.Up:
+                        current_node = Point(current_node.x, current_node.y - 0.5)
+                        vertices.append(current_node) # corner ┌+
+                        current_node = Point(current_node.x + 0.5, current_node.y)
+                        vertices.append(current_node)
+                    case Direction.Down:
+                        vertices.pop()
+                        current_node = Point(current_node.x, current_node.y - 0.5)
+                        vertices.append(current_node) # corner └-
+                        current_node = Point(current_node.x - 0.5, current_node.y)
+                        pass
+                
+                current_node = Point(current_node.x + step.amount, current_node.y)
+                previous_direction = Direction.Right
+            case Direction.Left:
+                match previous_direction:
+                    case Direction.Right:
+                        print("Shouldn't be possible to go from RIGHT to LEFT")
+                    case Direction.Left:
+                        pass
+                    case Direction.Up:
+                        vertices.pop()
+                        current_node = Point(current_node.x, current_node.y + 0.5)
+                        vertices.append(current_node) # corner ┐-
+                        current_node = Point(current_node.x + 0.5, current_node.y)
+                    case Direction.Down:
+                        current_node = Point(current_node.x, current_node.y + 0.5)
+                        vertices.append(current_node) # corner ┘+
+                        current_node = Point(current_node.x - 0.5, current_node.y)
+                        vertices.append(current_node)
+
+                current_node = Point(current_node.x - step.amount, current_node.y)
+                previous_direction = Direction.Left
+            case Direction.Up:
+                match previous_direction:
+                    case Direction.Right:
+                        vertices.pop()
+                        current_node = Point(current_node.x - 0.5, current_node.y)
+                        vertices.append(current_node) # corner ┘-
+                        current_node = Point(current_node.x, current_node.y + 0.5)
+                    case Direction.Left:
+                        current_node = Point(current_node.x - 0.5, current_node.y)
+                        vertices.append(current_node) # corner └+
+                        current_node = Point(current_node.x, current_node.y - 0.5)
+                        vertices.append(current_node)
+                    case Direction.Up:
+                        pass
+                    case Direction.Down:
+                        print("Shouldn't be possible to go from DOWN to UP")
+
+                current_node = Point(current_node.x, current_node.y - step.amount)
+                previous_direction = Direction.Up
+            case Direction.Down:
+                match previous_direction:
+                    case Direction.Right:
+                        current_node = Point(current_node.x + 0.5, current_node.y)
+                        vertices.append(current_node) # corner ┐+
+                        current_node = Point(current_node.x, current_node.y + 0.5)
+                        vertices.append(current_node)
+                    case Direction.Left:
+                        vertices.pop()
+                        current_node = Point(current_node.x + 0.5, current_node.y)
+                        vertices.append(current_node) # corner ┌-
+                        current_node = Point(current_node.x, current_node.y - 0.5)
+                    case Direction.Up:
+                        print("Shouldn't be possible to go from UP to DOWN")
+                    case Direction.Down:
+                        pass
+                
+                current_node = Point(current_node.x, current_node.y + step.amount)
+                previous_direction = Direction.Down
+
+        vertices.append(current_node)
+
+    # Add additional leftover piece for the last movement
+    match previous_direction:
+        case Direction.Right:
+            vertices.append(Point(current_node.x + 0.5, current_node.y))
+        case Direction.Left:
+            vertices.append(Point(current_node.x - 0.5, current_node.y))
+        case Direction.Up:
+            vertices.append(Point(current_node.x, current_node.y - 0.5))
+        case Direction.Down:
+            vertices.append(Point(current_node.x, current_node.y + 0.5))
+
+    return vertices
+
+print(f"{int(shoelace_area(get_vertices(dig_steps)))=}")
+print(f"{int(shoelace_area(get_vertices(new_dig_steps)))=}")
