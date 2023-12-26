@@ -40,3 +40,26 @@ class Direction(Enum):
     Right = Point(1, 0)
     Down = Point(0, 1)
     Left = Point(-1, 0)
+
+def shoelace_area(vertices: list[Point]) -> float:
+    n = len(vertices)
+    area = 0
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i].x * vertices[j].y
+        area -= vertices[j].x * vertices[i].y
+    area = abs(area) / 2
+    return area
+
+def invert_direction(direction: Direction) -> Direction:
+    match direction:
+        case Direction.Right:
+            return Direction.Left
+        case Direction.Left:
+            return Direction.Right
+        case Direction.Up:
+            return Direction.Down
+        case Direction.Down:
+            return Direction.Up
+        case Direction.Default:
+            return Direction.Default
