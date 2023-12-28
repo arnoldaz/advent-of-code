@@ -63,14 +63,10 @@ def calculate_possible_positions(starting_position: tuple[int, int], grid: list[
                 new_positions.append(right)
 
         current_positions = list(set(new_positions))
-    
-    
-    print(f"====== iteration {iterations}")
-    debug_print_grid(current_positions, grid)
-    print("======")
+        
+    # print(f"====== iteration {iterations}")
+    # debug_print_grid(current_positions, grid)
+    # print("======")
     return len(current_positions)
     
-                
-
-
-print(f"{calculate_possible_positions(starting_position, lines, 1000)=}")
+print(f"{calculate_possible_positions(starting_position, lines, 64)=}")

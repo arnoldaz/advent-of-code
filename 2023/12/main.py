@@ -1,12 +1,8 @@
-from functools import cache
 from typing import NamedTuple
-import time
 
-file_name = "unfolded-input-test.txt"
+file_name = "input.txt"
 with open(file_name) as file:
     lines = [line.rstrip() for line in file]
-
-# print(lines)
 
 class Arangement(NamedTuple):
     data: str
@@ -18,9 +14,6 @@ for line in lines:
     arangement_data = split_data[0]
     arangements_records = [int(record) for record in split_data[1].split(",")]
     arangements.append(Arangement(arangement_data, arangements_records))
-
-# print(arangements)
-
 
 def check_arangement_correct(arangement: Arangement) -> bool:
     data = arangement.data
@@ -56,7 +49,6 @@ def check_arangement_correct(arangement: Arangement) -> bool:
 
     return True
 
-@cache
 def check_arangement_possibly_correct(data: str, records: tuple[int, ...]) -> bool:
     group_index = 0
     i = 0
@@ -81,9 +73,6 @@ def check_arangement_possibly_correct(data: str, records: tuple[int, ...]) -> bo
                     return False
 
             i += record
-            # if len(data) >= i + 1 and data[i] == "#":
-            #     return False 
-
             group_index += 1
             continue
 
@@ -91,14 +80,9 @@ def check_arangement_possibly_correct(data: str, records: tuple[int, ...]) -> bo
     
 global_counter = 0
 def count_arangements_recursive(input: str, records: list[int]):
-    # start_time = time.perf_counter()
     possibly = check_arangement_possibly_correct(input.split("?")[0], tuple(records))
-    # end_time = time.perf_counter()
     if not possibly:
         return
-
-    print(f"{input=} {possibly=}")
-
 
     if "?" in input:
         test1 = input.replace("?", ".", 1)
@@ -108,10 +92,7 @@ def count_arangements_recursive(input: str, records: list[int]):
         count_arangements_recursive(test2, records)
         return
     
-    # start_time = time.perf_counter()
     is_correct = check_arangement_correct(Arangement(input, records))
-    # end_time = time.perf_counter()
-    # print(f"check {end_time-start_time=}")
     if is_correct:
         global global_counter
         global_counter += 1
@@ -124,32 +105,8 @@ def count_arangements(arangement: Arangement) -> int:
 
     return global_counter
 
-
-
-# final_counter = 0
-# for arangement in arangements:
-#     print(f"{arangement=}")
-#     count = count_arangements(arangement)
-#     print(f"{count=}")
-#     final_counter += count
-# print(f"{final_counter=}")
-
-
-# arangement = Arangement('#.?????????#?', [1, 8])
-# arangement = Arangement(".??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.", [1,1,3,1,1,3,1,1,3,1,1,3,1,1,3])
-# arangement = Arangement(".??..??...?##.", [1,1,3])
-
-# arangement = Arangement("?###????????", [3,2,1])
-
-arangement = Arangement("?###??????????###??????????###??????????###??????????###????????", [3,2,1,3,2,1,3,2,1,3,2,1,3,2,1])
-# arangement = Arangement(".###.......#", [3,2,1,3,2,1,3,2,1,3,2,1,3,2,1])
-# arangement = Arangement("?#????????????###????#????????????###????#????????????###????#????????????###????#????????????###??", [1,3,9,1,1,3,9,1,1,3,9,1,1,3,9,1,1,3,9,1])
-
-
-arangements = count_arangements(arangement)
-print(f"{arangements=}")
-
-
-# arangement = Arangement(".###....###?", [3,2,1])
-# arangement = Arangement(".####???????", [3,2,1])
-# print(f"{check_arangement_possibly_correct(arangement)}")
+final_counter = 0
+for arangement in arangements:
+    count = count_arangements(arangement)
+    final_counter += count
+print(f"{final_counter=}")

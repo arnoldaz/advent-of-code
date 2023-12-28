@@ -35,10 +35,6 @@ def get_node_neighbors(node: tuple[int, int], direction: Direction, same_directi
     
     return neighbors
 
-
-# 2 4 1 3 4 3
-# 3 2 1 5 4 5
-
 def find_least_loss_path(lines: list[str]):
     start: tuple[int, int] = (0, 0)
     end: tuple[int, int] = (len(lines[0]) - 1, len(lines) - 1)
@@ -54,24 +50,24 @@ def find_least_loss_path(lines: list[str]):
 
     test_matrix = [[0 for _ in range(len(lines[0]))] for _ in range(len(lines))]
 
-    previous_direction: Direction = Direction.No
-    same_direction_count = 0
+    # previous_direction: Direction = Direction.No
+    # same_direction_count = 0
 
     while len(open_set) > 0:
         for key in g_values:
             test_matrix[key[1]][key[0]] = g_values[key]
 
-        print(f"{open_set=} {closed_set=}")
-        print(f"{g_values=}")
-        for parent in parents:
-            print(f"key {parent}, value = {parents[parent]}")
-        print(f"{previous_direction=}")
-        print(f"{same_direction_count=}")
-        print("=================")
-        print('\n'.join([''.join(['{:4}'.format(item) for item in row]) for row in lines]))
-        print("--------------------")
-        print('\n'.join([''.join(['{:4}'.format(item) for item in row]) for row in test_matrix]))
-        print("=================")
+        # print(f"{open_set=} {closed_set=}")
+        # print(f"{g_values=}")
+        # for parent in parents:
+        #     print(f"key {parent}, value = {parents[parent]}")
+        # print(f"{previous_direction=}")
+        # print(f"{same_direction_count=}")
+        # print("=================")
+        # print("\n".join(["".join(["{:4}".format(item) for item in row]) for row in lines]))
+        # print("--------------------")
+        # print("\n".join(["".join(["{:4}".format(item) for item in row]) for row in test_matrix]))
+        # print("=================")
 
         n = None
 
@@ -80,7 +76,6 @@ def find_least_loss_path(lines: list[str]):
                 n = v
 
         if n == None:
-            print("shit")
             return None
 
         if n == end:
@@ -93,7 +88,7 @@ def find_least_loss_path(lines: list[str]):
             reconst_path.append(start)
             reconst_path.reverse()
 
-            print('Path found: {}'.format(reconst_path))
+            print(f"Path found: {reconst_path}")
             return reconst_path
 
         neighbors: list[tuple[tuple[int, int], Direction]] = []
@@ -107,8 +102,6 @@ def find_least_loss_path(lines: list[str]):
             direction = m_wrap[1]
 
             weight = int(lines[m[1]][m[0]])
-            # if the current node isn't in both open_list and closed_list
-            # add it to open_list and note n as it's parent
             if m not in open_set and m not in closed_set:
                 open_set.add(m)
 
@@ -123,9 +116,6 @@ def find_least_loss_path(lines: list[str]):
                 parents[m] = [(n, (direction, parents[n][min_value_index][1][1] + 1 if parents[n][min_value_index][1][0] == direction else parents[n][min_value_index][1][1]))]
                 g_values[m] = g_values[n] + weight
 
-            # otherwise, check if it's quicker to first visit n, then m
-            # and if it is, update parent data and g data
-            # and if the node was in the closed_set, move it to open_set
             else:
                 if g_values[m] > g_values[n] + weight:
                     g_values[m] = g_values[n] + weight
@@ -138,7 +128,6 @@ def find_least_loss_path(lines: list[str]):
                             min_value = value
                             min_value_index = i
 
-                    # parents[m] = (n, (direction, parents[n][1][1] + 1 if parents[n][1][0] == direction else parents[n][1][1]))
                     parents[m] = [(n, (direction, parents[n][min_value_index][1][1] + 1 if parents[n][min_value_index][1][0] == direction else parents[n][min_value_index][1][1]))]
 
                     if m in closed_set:
@@ -160,12 +149,6 @@ def find_least_loss_path(lines: list[str]):
                         closed_set.remove(m)
                         open_set.add(m)
 
-            # if direction == parents[m][1][0]:
-            #     same_direction_count += 1
-            # previous_direction = direction
-
-        # remove n from the open_set, and add it to closed_set
-        # because all of his neighbors were inspected
         open_set.remove(n)
         closed_set.add(n)
 
@@ -181,11 +164,9 @@ for step in path[1:]:
     weight_sum += weight
 
     lines[step[1]] = lines[step[1]][:step[0]] + "@" + lines[step[1]][step[0]+1:]
-    # lines[step[1]] = len(lines[step[1]][:step[0]]) * "." + "@" + len(lines[step[1]][step[0]+1:]) * "."
 
 for line in lines:
     print(line)
 
 print(f"{weight_sum=}")
 
-# print(f"{find_least_loss_path(lines)=}")
