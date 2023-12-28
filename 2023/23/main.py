@@ -5,7 +5,8 @@ import sys
 
 sys.setrecursionlimit(2 ** 30)
 
-with open("input.txt") as file:
+FILE_NAME = "input-test.txt"
+with open(FILE_NAME) as file:
     lines = [line.rstrip() for line in file]
 
 class Point:
@@ -40,6 +41,9 @@ class Point:
         if isinstance(other, Point):
             return self.x == other.x and self.y == other.y and self.z == other.z
         
+        if other == None:
+            return False
+
         raise Exception(f"Unrecognized variable compared to Point - {other}")
 
 class Direction(Enum):
@@ -48,7 +52,6 @@ class Direction(Enum):
     Right = Point(1, 0)
     Down = Point(0, 1)
     Left = Point(-1, 0)
-
 class Matrix:
     _data: list[list[str]]
 
@@ -107,6 +110,10 @@ class Path:
 
         return new_path
 
+def remove_list_indexes(list: list, indexes_to_remove: list[int]):
+    for item in sorted(indexes_to_remove, reverse=True): 
+        del list[item]
+
 def get_initial_data(lines: list[str]) -> tuple[Matrix, Point, Point]:
     matrix = Matrix(lines)
     matrix_data = matrix.get_data()
@@ -129,93 +136,138 @@ def get_initial_data(lines: list[str]) -> tuple[Matrix, Point, Point]:
 
     return (matrix, start_position, end_position)
 
-def calculate_paths_recursive(paths: list[Path], matrix: Matrix, end_position: Point, ignore_directions: bool, finished_path_lengths: list[int]):
-    for path in paths[:]:
-        if path.current_position == end_position:
+def output_path(path_file_name: str, path: Path, matrix: Matrix):
+    with open(path_file_name, "w") as file:
+        for y in range(matrix.height()):
+            write_line = []
+            for x in range(matrix.width()):
+                if Point(x, y) in path.steps:
+                    write_line.append("@")
+                else:
+                    write_line.append(matrix.get_symbol(Point(x, y)))
+            file.write("".join(write_line) + "\n")
+
+def output_dot_file(graph: dict[Point, dict[Point, int]]):
+    with open(f"{FILE_NAME.removesuffix(".txt")}.dot", "w") as file:
+        file.write("graph conections {\n")
+        file.write("    graph [overlap=false];\n")
+        for key in graph:
+            values = graph[key]
+            for value_key in values:
+                file.write(f"    x{key.x}y{key.y} -- x{value_key.x}y{value_key.y} [label=\"{values[value_key]}\"];\n")
+        file.write("}\n")
+
+def get_possible_movements(path: Path, matrix: Matrix, ignore_directions: bool) -> list[Point]:
+    neighbors = matrix.get_neighbors(path.current_position)
+    possible_movements: list[Point] = []
+
+    for neighbor in neighbors:
+        neighbor_position, neighbor_direction = neighbor
+        symbol = matrix.get_symbol(neighbor_position)
+        
+        if symbol == "#":
+            continue
+        if not ignore_directions:
+            if symbol == "<" and neighbor_direction != Direction.Left:
+                continue
+            if symbol == ">" and neighbor_direction != Direction.Right:
+                continue
+            if symbol == "v" and neighbor_direction != Direction.Down:
+                continue
+            if symbol == "^" and neighbor_direction != Direction.Up:
+                continue
+        if neighbor_position in path.steps:
             continue
 
-        neighbors = matrix.get_neighbors(path.current_position)
-        possible_movements: list[Point] = []
+        possible_movements.append(neighbor_position)
+    
+    return possible_movements
 
-        for neighbor in neighbors:
-            neighbor_position, neighbor_direction = neighbor
-            symbol = matrix.get_symbol(neighbor_position)
+def walk_until_intersection(path: Path, matrix: Matrix, start_position: Point, end_position: Point, ignore_directions: bool) -> tuple[list[Point], bool]:
+    while True:
+        possible_movements = get_possible_movements(path, matrix, ignore_directions)
+
+        if len(possible_movements) == 1:
+            path.take_step(possible_movements[0])
             
-            if symbol == "#":
-                continue
-            if not ignore_directions:
-                if symbol == "<" and neighbor_direction != Direction.Left:
-                    continue
-                if symbol == ">" and neighbor_direction != Direction.Right:
-                    continue
-                if symbol == "v" and neighbor_direction != Direction.Down:
-                    continue
-                if symbol == "^" and neighbor_direction != Direction.Up:
-                    continue
-            if neighbor_position in path.steps:
-                continue
+            if path.current_position == end_position or path.current_position == start_position:
+                return [], True
+        else:
+            return possible_movements, False
 
-            possible_movements.append(neighbor_position)
+def create_graph(matrix: Matrix, start_position: Point, end_position: Point, ignore_directions: bool) -> dict[Point, dict[Point, int]]:
+    graph: dict[Point, dict[Point, int]] = {}
+    
+    intersections: list[Point] = [start_position]
+    for y, line in enumerate(matrix.get_data()):
+        for x, _ in enumerate(line):
+            neighbors = [1 for point, _ in matrix.get_neighbors(Point(x, y)) if matrix.get_symbol(point) != "#" and matrix.get_symbol(Point(x, y)) == "."]
+            if len(neighbors) > 2:
+                intersections.append(Point(x, y))
 
-        # print(f"{i=} path moves to {possible_movements=} {path.current_position=} {path.get_path_length()=}")
+    intersections.append(end_position)
 
-        match len(possible_movements):
-            case 0:
-                for j, path_to_delete in enumerate(paths):
-                    if path_to_delete.id == path.id and path.current_position != end_position:
-                        paths.pop(j)
-                        break
-                continue
-            case 1:
-                for path_to_step in paths:
-                    if path_to_step.id == path.id:
-                        path_to_step.take_step(possible_movements[0])
-                        break
-            case _:
-                for j, path_to_delete in enumerate(paths):
-                    if path_to_delete.id == path.id:
-                        paths.pop(j)
-                        break
-                
-                for move in possible_movements:
-                    cloned_path = path.copy()
-                    cloned_path.take_step(move)
-                    paths.append(cloned_path)
+    for intersection in intersections:
+        graph[intersection] = {}
+        path = Path(intersection)
+        neighbors = get_possible_movements(path, matrix, ignore_directions)
 
-    if any(path.current_position != end_position for path in paths):
-        removed_path_indexes: list[int] = []
-        for f, path in enumerate(paths):
-            if path.current_position == end_position:
-                removed_path_indexes.append(f)
+        paths: list[Path] = []
+        for neighbor_position in neighbors:
+            copy_path = path.copy()
+            copy_path.take_step(neighbor_position)
+            paths.append(copy_path)
 
-        for item in sorted(removed_path_indexes, reverse=True):
-            length = paths[item].get_path_length()
-            finished_path_lengths.append(length)
-            print(f"Found new ending with length {length}")
-            del paths[item]
-        
-        # Print for progress reporting
-        if paths[0].get_path_length() % 250 == 0:
-            print(f"Paths {len(paths)} has length {paths[0].get_path_length()}")
+        for walk_path in paths:
+            _, _ = walk_until_intersection(walk_path, matrix, start_position, end_position, ignore_directions)
+            graph[intersection][walk_path.current_position] = walk_path.get_path_length() - 1
 
-        calculate_paths_recursive(paths, matrix, end_position, ignore_directions, finished_path_lengths)
+    # 2d matrix graph
+    # simple_graph_matrix = [[0 for _ in range(len(graph))] for _ in range(len(graph))]
 
-def calculate_max_path_length(matrix: Matrix, start_position: Point, end_position: Point, ignore_directions: bool) -> int:
-    all_paths = [Path(start_position)]
-    finished_path_lengths: list[int] = []
+    # keys = list(graph.keys())
+    # for y, key in enumerate(keys):
+    #     edges = graph[key]
+    #     edge_keys = list(edges.keys())
+    #     for edge_key in edge_keys:
+    #         x = keys.index(edge_key)
+    #         simple_graph_matrix[y][x] = edges[edge_key]
 
-    calculate_paths_recursive(all_paths, matrix, end_position, ignore_directions, finished_path_lengths)
+    return graph
+
+def find_all_paths(graph: dict[Point, dict[Point, int]], start: Point, end: Point, path: list[Point], visited: list[Point]) -> list[list[Point]]:
+    path = path + [start]
+    if start == end:
+        return [path]
+    
+    if start not in graph or start in visited:
+        return []
+
+    visited.append(start)
+
+    paths: list[list[Point]] = []
+    for node in graph[start]:
+        if node not in path:
+            new_paths = find_all_paths(graph, node, end, path, visited.copy())
+            for new_path in new_paths:
+                paths.append(new_path)
+
+    visited.remove(start)
+
+    return paths
+
+def get_max_path_weight(graph: dict[Point, dict[Point, int]], start: Point, end: Point) -> int:
+    max_path_sum = 0
+    all_paths = find_all_paths(graph, start, end, [], [])
 
     for path in all_paths:
-        print(f"Length: {path.get_path_length() - 1}")
+        path_sum = sum([graph[point1][point2] for point1, point2 in zip(path, path[1:])])
+        if path_sum > max_path_sum:
+            max_path_sum = path_sum
 
-    if len(all_paths) > 0:
-        finished_path_lengths += [path.get_path_length() for path in all_paths]
-
-    print(f"{finished_path_lengths=}")
-
-    return max(finished_path_lengths) - 1
+    return max_path_sum
 
 _matrix, _start_position, _end_position = get_initial_data(lines)
-_max_path_length = calculate_max_path_length(_matrix, _start_position, _end_position, True)
-print(f"{_max_path_length=}")
+_graph_dict = create_graph(_matrix, _start_position, _end_position, True)
+_max_path_sum = get_max_path_weight(_graph_dict, _start_position, _end_position)
+print(f"{_max_path_sum=}")
