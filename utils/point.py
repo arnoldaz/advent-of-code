@@ -1,4 +1,5 @@
 from enum import Enum
+import math
 
 class Point:
     x: int
@@ -20,6 +21,9 @@ class Point:
         return hash((self.x, self.y, self.z))
 
     def __add__(self, other):
+        if other == None:
+            raise Exception(f"Adding None to Point - {self}")
+
         if isinstance(other, Point):
             return Point(self.x + other.x, self.y + other.y, self.z + other.z)
         
@@ -29,6 +33,9 @@ class Point:
         raise Exception(f"Unrecognized variable added to Point - {other}")
 
     def __eq__(self, other):
+        if other == None:
+            return False
+
         if isinstance(other, Point):
             return self.x == other.x and self.y == other.y and self.z == other.z
         
@@ -43,11 +50,13 @@ class Direction(Enum):
 
 def shoelace_area(vertices: list[Point]) -> float:
     n = len(vertices)
-    area = 0
+    area = 0.0
+
     for i in range(n):
         j = (i + 1) % n
         area += vertices[i].x * vertices[j].y
         area -= vertices[j].x * vertices[i].y
+
     area = abs(area) / 2
     return area
 
@@ -63,3 +72,19 @@ def invert_direction(direction: Direction) -> Direction:
             return Direction.Up
         case Direction.Default:
             return Direction.Default
+
+def generate_2d_intersection(line1_start: Point, line1_end: Point, line2_start: Point, line2_end: Point) -> tuple[float, float]:
+    # https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
+    x1, x2 = line1_start.x, line1_end.x
+    y1, y2 = line1_start.y, line1_end.y
+
+    x3, x4 = line2_start.x, line2_end.x
+    y3, y4 = line2_start.y, line2_end.y
+
+    try:
+        px = ( (x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4) ) / ( (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4) ) 
+        py = ( (x1*y2-y1*x2)*(y3-y4)-(y1-y2)*(x3*y4-y3*x4) ) / ( (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4) )
+    except ZeroDivisionError:
+        return (math.inf, math.inf)
+
+    return (px, py)
