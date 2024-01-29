@@ -12,7 +12,7 @@ def parse_rounds(lines: list[str]) -> list[Round]:
 
     return rounds
 
-MOVE_CONVERSION = {
+SILVER_MOVE_CONVERSION = {
     "X": "A",
     "Y": "B",
     "Z": "C",
@@ -37,16 +37,15 @@ def get_round_outcome_score(opponent_move: str, my_move: str) -> int:
             return 6 if my_move == "C" else 0
         case "C": # scissors
             return 6 if my_move == "A" else 0
-    
-    print("Impossible to reach")
-    return -9999
+        case _: # impossible to reach
+            return -99999
 
 def silver_solution(lines: list[str]) -> int:
     rounds = parse_rounds(lines)
     score = 0
 
     for round in rounds:
-        opponent_move, my_move = round.opponent_move, MOVE_CONVERSION[round.my_move]
+        opponent_move, my_move = round.opponent_move, SILVER_MOVE_CONVERSION[round.my_move]
         outcome_score = get_round_outcome_score(opponent_move, my_move)
         response_score = MOVE_SCORE[my_move]
         score += outcome_score + response_score
@@ -81,8 +80,8 @@ def gold_solution(lines: list[str]) -> int:
                 my_real_move = WINNING_MOVE_CONVERSION[round.opponent_move]
                 outcome_score = 6
             case _: # impossible to reach
-                my_real_move = "AAA"
-                outcome_score = -9999
+                my_real_move = "AAAAA"
+                outcome_score = -99999
 
         response_score = MOVE_SCORE[my_real_move]
         score += outcome_score + response_score
