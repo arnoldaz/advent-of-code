@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from types import ModuleType
 from typing import Callable, NamedTuple
 
-from utils.aoc import get_solution_module_path, read_input_file, read_test_input
+from utils.aoc import copy_template_file, get_solution_module_path, read_input_file, read_test_input
 
 class ProgramArguments(NamedTuple):
     year: int
@@ -14,6 +14,7 @@ class ProgramArguments(NamedTuple):
     silver: bool
     gold: bool
     test: bool
+    add_template: bool
 
 def parse_arguments() -> ProgramArguments:
     parser = argparse.ArgumentParser(prog="Advent of Code runner", description="Runs Advent of Code solutions.")
@@ -22,9 +23,10 @@ def parse_arguments() -> ProgramArguments:
     parser.add_argument("-s", "--silver", action="store_true", help="Only run silver solution.")
     parser.add_argument("-g", "--gold", action="store_true", help="Only run gold solution.")
     parser.add_argument("-t", "--test", action="store_true", help="Run test input.")
+    parser.add_argument("-a", "--add-template", action="store_true", help="Add template solution module.")
 
     untyped_args = parser.parse_args()
-    args = ProgramArguments(untyped_args.year, untyped_args.day, untyped_args.silver, untyped_args.gold, untyped_args.test)
+    args = ProgramArguments(untyped_args.year, untyped_args.day, untyped_args.silver, untyped_args.gold, untyped_args.test, untyped_args.add_template)
 
     if not 2015 <= args.year <= 2025:
         parser.error("Year (-y/--year) is not a valid Advent of Code year.")
@@ -76,6 +78,10 @@ def run_solution(year: int, day: int, run_silver: bool, run_gold: bool, test_inp
 def main():
     args = parse_arguments()
     load_dotenv()
+
+    if args.add_template:
+        copy_template_file(args.year, args.day)
+        return
 
     run_solution(args.year, args.day, args.silver or not args.gold, args.gold or not args.silver, args.test)
 

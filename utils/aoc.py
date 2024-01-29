@@ -1,10 +1,12 @@
 import os
 import requests
+import shutil
 import sys
 from pathlib import Path
 
 HEADERS = { "User-Agent": "Personal AoC solutions by ArnoldaZ (github.com/arnoldaz/advent-of-code)" }
 INPUT_URL = "https://adventofcode.com/{year}/day/{day}/input"
+TEMPLATE_FILE_PATH = "solution_template.py"
 
 def get_solution_module_path(year: int, day: int) -> Path:
     return Path(f"{year}/{day:0>2}.py")
@@ -72,3 +74,10 @@ def read_test_input(year: int, day: int) -> list[str]:
     
     with open(input_file_path) as file:
         return [line.rstrip() for line in file]
+
+def copy_template_file(year: int, day: int):
+    module_file_path = get_solution_module_path(year, day)
+    if os.path.exists(module_file_path):
+        return
+
+    shutil.copyfile(TEMPLATE_FILE_PATH, module_file_path)
