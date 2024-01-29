@@ -18,12 +18,12 @@ class ProgramArguments(NamedTuple):
 
 def parse_arguments() -> ProgramArguments:
     parser = argparse.ArgumentParser(prog="Advent of Code runner", description="Runs Advent of Code solutions.")
-    parser.add_argument("-y", "--year", type=int, help="Solution year.", required=True)
-    parser.add_argument("-d", "--day", type=int, help="Solution day.", required=True)
-    parser.add_argument("-s", "--silver", action="store_true", help="Only run silver solution.")
-    parser.add_argument("-g", "--gold", action="store_true", help="Only run gold solution.")
-    parser.add_argument("-t", "--test", action="store_true", help="Run test input.")
-    parser.add_argument("-a", "--add-template", action="store_true", help="Add template solution module.")
+    parser.add_argument("-y", "--year", type=int, help="solution year", required=True)
+    parser.add_argument("-d", "--day", type=int, help="solution day", required=True)
+    parser.add_argument("-s", "--silver", action="store_true", help="only run silver solution")
+    parser.add_argument("-g", "--gold", action="store_true", help="only run gold solution")
+    parser.add_argument("-t", "--test", action="store_true", help="run with test input")
+    parser.add_argument("-a", "--add-template", action="store_true", help="add template solution module")
 
     untyped_args = parser.parse_args()
     args = ProgramArguments(untyped_args.year, untyped_args.day, untyped_args.silver, untyped_args.gold, untyped_args.test, untyped_args.add_template)
