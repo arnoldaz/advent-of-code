@@ -7,7 +7,7 @@ HEADERS = { "User-Agent": "Personal AoC solutions by ArnoldaZ (github.com/arnold
 INPUT_URL = "https://adventofcode.com/{year}/day/{day}/input"
 
 def get_solution_module_path(year: int, day: int) -> Path:
-    return Path(f"{year}/{day:0>2}/{day:0>2}.py")
+    return Path(f"{year}/{day:0>2}.py")
 
 def get_input_file_path(year: int, day: int) -> Path:
     return Path(f"input/{year}/{day:0>2}/input.txt")
