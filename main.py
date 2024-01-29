@@ -6,13 +6,14 @@ from dotenv import load_dotenv
 from types import ModuleType
 from typing import Callable, NamedTuple
 
-from utils.aoc import  get_solution_module_path, read_input_file
+from utils.aoc import get_solution_module_path, read_input_file, read_test_input
 
 class ProgramArguments(NamedTuple):
-	year: int
-	day: int
-	silver: bool
-	gold: bool
+    year: int
+    day: int
+    silver: bool
+    gold: bool
+    test: bool
 
 def parse_arguments() -> ProgramArguments:
     parser = argparse.ArgumentParser(prog="Advent of Code runner", description="Runs Advent of Code solutions.")
@@ -20,9 +21,10 @@ def parse_arguments() -> ProgramArguments:
     parser.add_argument("-d", "--day", type=int, help="Solution day.", required=True)
     parser.add_argument("-s", "--silver", action="store_true", help="Only run silver solution.")
     parser.add_argument("-g", "--gold", action="store_true", help="Only run gold solution.")
+    parser.add_argument("-t", "--test", action="store_true", help="Run test input.")
 
     untyped_args = parser.parse_args()
-    args = ProgramArguments(untyped_args.year, untyped_args.day, untyped_args.silver, untyped_args.gold)
+    args = ProgramArguments(untyped_args.year, untyped_args.day, untyped_args.silver, untyped_args.gold, untyped_args.test)
 
     if not 2015 <= args.year <= 2025:
         parser.error("Year (-y/--year) is not a valid Advent of Code year.")
@@ -59,9 +61,9 @@ def load_module(year: int, day: int) -> ModuleType:
 
     return module
 
-def run_solution(year: int, day: int, run_silver: bool, run_gold: bool):
+def run_solution(year: int, day: int, run_silver: bool, run_gold: bool, test_input: bool):
     module = load_module(year, day)
-    input_data = read_input_file(year, day)
+    input_data = read_input_file(year, day) if not test_input else read_test_input(year, day)
 
     if run_silver:
         result, time_taken = timed_solution(module.silver_solution, input_data)
@@ -75,7 +77,7 @@ def main():
     args = parse_arguments()
     load_dotenv()
 
-    run_solution(args.year, args.day, args.silver or not args.gold, args.gold or not args.silver)
+    run_solution(args.year, args.day, args.silver or not args.gold, args.gold or not args.silver, args.test)
 
 if __name__ == "__main__":
-	main()
+    main()

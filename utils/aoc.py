@@ -12,6 +12,9 @@ def get_solution_module_path(year: int, day: int) -> Path:
 def get_input_file_path(year: int, day: int) -> Path:
     return Path(f"input/{year}/{day:0>2}/input.txt")
 
+def get_test_input_file_path(year: int, day: int) -> Path:
+    return Path(f"input/{year}/{day:0>2}/input-test.txt")
+
 def get_session_cookie():
     session_cookie = os.getenv("AOC_SESSION_COOKIE")
     if session_cookie is None:
@@ -45,5 +48,27 @@ def read_input_file(year: int, day: int) -> list[str]:
     if not os.path.exists(input_file_path):
         download_input_file(year, day)
 
+    with open(input_file_path) as file:
+        return [line.rstrip() for line in file]
+
+def read_user_input() -> list[str]:
+    print("Enter/Paste your test data. Enter Ctrl-Z to save it.")
+    user_input: list[str] = []
+    while True:
+        try:
+            line = input()
+        except EOFError:
+            break
+        user_input.append(line)
+
+    return user_input
+
+def read_test_input(year: int, day: int) -> list[str]:
+    input_file_path = get_test_input_file_path(year, day)
+    if not os.path.exists(input_file_path):
+        user_input = read_user_input()
+        input_file_path.write_text("\n".join(user_input))
+        return user_input
+    
     with open(input_file_path) as file:
         return [line.rstrip() for line in file]
