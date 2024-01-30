@@ -1,17 +1,4 @@
 
-file_name = "input.txt"
-with open(file_name) as file:
-    lines = [line.rstrip() for line in file]
-
-def int_digits(lines: list[str]) -> int:
-    final_value = 0
-    for line in lines:
-        digit_map = [int(digit) for digit in line if digit.isdigit()]
-        value = digit_map[0] * 10 + digit_map[-1]
-        final_value += value
-
-    return final_value
-
 digit_words = [
     "zero",
     "one",
@@ -25,7 +12,16 @@ digit_words = [
     "nine",
 ]
 
-def word_digits(lines: list[str]) -> int:
+def silver_solution(lines: list[str]) -> int:
+    final_value = 0
+    for line in lines:
+        digit_map = [int(digit) for digit in line if digit.isdigit()]
+        value = digit_map[0] * 10 + digit_map[-1]
+        final_value += value
+
+    return final_value
+
+def gold_solution(lines: list[str]) -> int:
     final_value = 0
 
     for line in lines:
@@ -51,6 +47,3 @@ def word_digits(lines: list[str]) -> int:
         final_value += value
 
     return final_value
-
-print(f"{int_digits(lines)=}")
-print(f"{word_digits(lines)=}")
