@@ -29,7 +29,7 @@ def get_round_outcome_score(opponent_move: str, my_move: str) -> int:
     # A for rock, B for paper, C for scissors
     if opponent_move == my_move:
         return 3
-    
+
     match opponent_move:
         case "A": # rock
             return 6 if my_move == "B" else 0
@@ -41,11 +41,11 @@ def get_round_outcome_score(opponent_move: str, my_move: str) -> int:
             return -99999
 
 def silver_solution(lines: list[str]) -> int:
-    rounds = parse_rounds(lines)
+    game_rounds = parse_rounds(lines)
     score = 0
 
-    for round in rounds:
-        opponent_move, my_move = round.opponent_move, SILVER_MOVE_CONVERSION[round.my_move]
+    for game_round in game_rounds:
+        opponent_move, my_move = game_round.opponent_move, SILVER_MOVE_CONVERSION[game_round.my_move]
         outcome_score = get_round_outcome_score(opponent_move, my_move)
         response_score = MOVE_SCORE[my_move]
         score += outcome_score + response_score
@@ -65,19 +65,19 @@ WINNING_MOVE_CONVERSION = {
 }
 
 def gold_solution(lines: list[str]) -> int:
-    rounds = parse_rounds(lines)
+    game_rounds = parse_rounds(lines)
     score = 0
 
-    for round in rounds:
-        match round.my_move:
+    for game_round in game_rounds:
+        match game_round.my_move:
             case "X": # lose
-                my_real_move = LOSING_MOVE_CONVERSION[round.opponent_move]
+                my_real_move = LOSING_MOVE_CONVERSION[game_round.opponent_move]
                 outcome_score = 0
             case "Y": # draw
-                my_real_move = round.opponent_move
+                my_real_move = game_round.opponent_move
                 outcome_score = 3
             case "Z": # win
-                my_real_move = WINNING_MOVE_CONVERSION[round.opponent_move]
+                my_real_move = WINNING_MOVE_CONVERSION[game_round.opponent_move]
                 outcome_score = 6
             case _: # impossible to reach
                 my_real_move = "AAAAA"

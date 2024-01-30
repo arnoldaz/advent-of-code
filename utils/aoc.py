@@ -1,8 +1,8 @@
 import os
-import requests
 import shutil
 import sys
 from pathlib import Path
+import requests
 
 HEADERS = { "User-Agent": "Personal AoC solutions by ArnoldaZ (github.com/arnoldaz/advent-of-code)" }
 INPUT_URL = "https://adventofcode.com/{year}/day/{day}/input"
@@ -27,7 +27,7 @@ def get_session_cookie():
 
 def download_input_file(year: int, day: int):
     url = INPUT_URL.format(year=year, day=day)
-    response = requests.get(url, cookies=get_session_cookie(), headers=HEADERS)
+    response = requests.get(url, cookies=get_session_cookie(), headers=HEADERS, timeout=20)
 
     if not response.ok:
         if response.status_code == 400:
@@ -43,14 +43,14 @@ def download_input_file(year: int, day: int):
     if not os.path.exists(input_file_directory):
         os.makedirs(input_file_directory)
 
-    input_file_path.write_text(data)
+    input_file_path.write_text(data, encoding="utf-8")
 
 def read_input_file(year: int, day: int) -> list[str]:
     input_file_path = get_input_file_path(year, day)
     if not os.path.exists(input_file_path):
         download_input_file(year, day)
 
-    with open(input_file_path) as file:
+    with open(input_file_path, encoding="utf-8") as file:
         return [line.rstrip() for line in file]
 
 def read_user_input() -> list[str]:
@@ -69,10 +69,10 @@ def read_test_input(year: int, day: int) -> list[str]:
     input_file_path = get_test_input_file_path(year, day)
     if not os.path.exists(input_file_path):
         user_input = read_user_input()
-        input_file_path.write_text("\n".join(user_input))
+        input_file_path.write_text("\n".join(user_input), encoding="utf-8")
         return user_input
-    
-    with open(input_file_path) as file:
+
+    with open(input_file_path, encoding="utf-8") as file:
         return [line.rstrip() for line in file]
 
 def copy_template_file(year: int, day: int):

@@ -1,4 +1,3 @@
-
 def get_letter_priority(letter: str) -> int:
     ascii_number = ord(letter)
 

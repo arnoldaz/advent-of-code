@@ -1,4 +1,3 @@
-
 def get_grouped_calories_sum(lines: list[str]) -> list[int]:
     groups: list[int] = []
     current_group: list[int] = []

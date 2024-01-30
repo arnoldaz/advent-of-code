@@ -15,7 +15,7 @@ def gold_solution(lines: list[str]) -> int:
                 index = line.find(digit_word, index)
                 if index == -1:
                     break
-                
+
                 digit_list.append((index, i))
                 index += len(digit_word)
 

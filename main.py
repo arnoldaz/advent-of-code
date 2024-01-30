@@ -2,10 +2,9 @@ import argparse
 import importlib.util
 import sys
 import time
-from dotenv import load_dotenv
 from types import ModuleType
 from typing import Callable, NamedTuple
-
+from dotenv import load_dotenv
 from utils.aoc import copy_template_file, get_solution_module_path, read_input_file, read_test_input
 
 class ProgramArguments(NamedTuple):
@@ -30,7 +29,7 @@ def parse_arguments() -> ProgramArguments:
 
     if not 2015 <= args.year <= 2025:
         parser.error("Year (-y/--year) is not a valid Advent of Code year.")
-    
+
     if not 1 <= args.day <= 25:
         parser.error("Day (-d/--day) is not a valid Advent of Code day.")
 
@@ -56,7 +55,7 @@ def load_module(year: int, day: int) -> ModuleType:
     if not hasattr(module, "silver_solution"):
         print(f"Error: Loaded module '{module_path}' doesn't have silver solution function.")
         sys.exit(-1)
-        
+
     if not hasattr(module, "gold_solution"):
         print(f"Error: Loaded module '{module_path}' doesn't have gold solution function.")
         sys.exit(-1)
