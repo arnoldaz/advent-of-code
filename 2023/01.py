@@ -1,4 +1,3 @@
-
 DIGIT_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
 
 def silver_solution(lines: list[str]) -> int:
