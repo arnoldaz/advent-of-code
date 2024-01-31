@@ -2,17 +2,17 @@
 from typing import NamedTuple
 from utils.ranges import Range, find_overlap, range_in_range
 
-class AssigmentPair(NamedTuple):
+class AssignmentPair(NamedTuple):
     left: Range
     right: Range
 
-def parse_input(lines: list[str]) -> list[AssigmentPair]:
-    assignment_pairs: list[AssigmentPair] = []
+def parse_input(lines: list[str]) -> list[AssignmentPair]:
+    assignment_pairs: list[AssignmentPair] = []
     for line in lines:
         left, right = line.split(",")
         left_start, left_end = left.split("-")
         right_start, right_end = right.split("-")
-        assignment_pairs.append(AssigmentPair(Range(int(left_start), int(left_end)), Range(int(right_start), int(right_end))))
+        assignment_pairs.append(AssignmentPair(Range(int(left_start), int(left_end)), Range(int(right_start), int(right_end))))
 
     return assignment_pairs
 
