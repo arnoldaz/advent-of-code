@@ -67,6 +67,10 @@ def read_user_input() -> list[str]:
 
 def read_test_input(year: int, day: int) -> list[str]:
     input_file_path = get_test_input_file_path(year, day)
+    input_file_directory = os.path.dirname(input_file_path)
+    if not os.path.exists(input_file_directory):
+        os.makedirs(input_file_directory)
+
     if not os.path.exists(input_file_path):
         user_input = read_user_input()
         input_file_path.write_text("\n".join(user_input), encoding="utf-8")

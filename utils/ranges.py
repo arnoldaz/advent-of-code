@@ -33,7 +33,7 @@ def split_ranges(original_ranges: list[Range], critical_ranges: list[Range]) -> 
     # original_ranges = [Range(79, 92), Range(55, 150)]
     # critical_ranges = [Range(98, 99), Range(50, 95)]
     # result = [(79, 92), (55, 95), (96, 97), (98, 99), (100, 150)]
-    
+
     modified_ranges = original_ranges[:]
     final_ranges = set()
 
@@ -45,7 +45,7 @@ def split_ranges(original_ranges: list[Range], critical_ranges: list[Range]) -> 
             else:
                 if original_range in final_ranges:
                     final_ranges.remove(original_range)
-                
+
                 final_ranges.add(overlap)
                 final_ranges.update(remove_overlapping_range(original_range, overlap))
 
