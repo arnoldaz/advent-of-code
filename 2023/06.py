@@ -1,4 +1,5 @@
 from functools import reduce
+import math
 from typing import NamedTuple
 
 class Race(NamedTuple):
@@ -20,15 +21,13 @@ def get_combined_race(lines: list[str]) -> Race:
     return Race(time_number, distance_number)
 
 def calculate_race_win_count(time: int, distance: int) -> int:
-    final_count = 0
+    discriminant = time * time - 4 * distance
+    x1 = (-time + math.sqrt(discriminant)) / (-2)
+    x2 = (-time - math.sqrt(discriminant)) / (-2)
 
-    for speed in range(1, time + 1):
-        actual_time = time - speed
-        traveled_distance = actual_time * speed
-        if traveled_distance > distance:
-            final_count += 1
+    solution_range = x2 - x1
 
-    return final_count
+    return int(solution_range) - 1 if solution_range.is_integer() else math.floor(x2) - math.ceil(x1) + 1
 
 def calculate_ways_to_win(races: list[Race]) -> int:
     return reduce(lambda x, race: x * calculate_race_win_count(race.time, race.distance), races, 1)
