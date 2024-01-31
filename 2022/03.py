@@ -1,15 +1,5 @@
 def get_letter_priority(letter: str) -> int:
-    ascii_number = ord(letter)
-
-    # Upper case letter, need to be converted to range 27-52
-    if 65 <= ascii_number <= 90:
-        return ascii_number - 38
-
-    # Lower case letter, need to be converted to range 1-26
-    if 97 <= ascii_number <= 122:
-        return ascii_number - 96
-
-    return -1 # impossible to reach
+    return ord(letter) - 38 if letter.isupper() else ord(letter) - 96
 
 def silver_solution(lines: list[str]) -> int:
     priority_sum = 0
