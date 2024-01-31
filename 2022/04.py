@@ -1,4 +1,3 @@
-
 from typing import NamedTuple
 from utils.ranges import Range, find_overlap, range_in_range
 
