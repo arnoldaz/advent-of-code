@@ -24,13 +24,15 @@ class Matrix[T]:
         return 0 <= position.x < self.width() and 0 <= position.y < self.height()
 
     def get_neighbors(self, position: Point) -> list[tuple[Point, Direction]]:
-        return [(position + direction.value, direction) for direction in Direction if direction != Direction.Default and self.in_bounds(position + direction.value)]
+        return [(position + direction.value, direction) for direction in Direction if direction != Direction.NONE and self.in_bounds(position + direction.value)]
 
-    def find_first_character_instance(self, symbol_to_find: T) -> Optional[Point]:   
+    def find_first_character_instance(self, symbol_to_find: T) -> Optional[Point]:
         for y, line in enumerate(self.get_data()):
             for x, char in enumerate(line):
                 if char == symbol_to_find:
                     return Point(x, y)
+
+        return None
 
 def rotate_matrix(lines: list[str]):
     return ["".join(line) for line in zip(*lines[::-1])]

@@ -21,32 +21,38 @@ class Point:
         return hash((self.x, self.y, self.z))
 
     def __add__(self, other):
-        if other == None:
-            raise Exception(f"Adding None to Point - {self}")
+        if other is None:
+            raise RuntimeError(f"Adding None to Point - {self}")
 
         if isinstance(other, Point):
             return Point(self.x + other.x, self.y + other.y, self.z + other.z)
-        
+
         if isinstance(other, int):
             return Point(self.x + other, self.y + other, self.z + other)
-        
-        raise Exception(f"Unrecognized variable added to Point - {other}")
+
+        if isinstance(other, Direction):
+            direction_point = other.value
+            return Point(self.x + direction_point.x, self.y + direction_point.y, self.z + direction_point.z)
+
+        raise RuntimeError(f"Unrecognized variable added to Point - {other}")
 
     def __eq__(self, other):
-        if other == None:
+        if other is None:
             return False
 
         if isinstance(other, Point):
             return self.x == other.x and self.y == other.y and self.z == other.z
-        
-        raise Exception(f"Unrecognized variable compared to Point - {other}")
+
+        raise RuntimeError(f"Unrecognized variable compared to Point - {other}")
+
+INVALID_POINT = Point(-1, -1, -1)
 
 class Direction(Enum):
-    Default = Point(0, 0)
-    Up = Point(0, -1)
-    Right = Point(1, 0)
-    Down = Point(0, 1)
-    Left = Point(-1, 0)
+    NONE = Point(0, 0)
+    UP = Point(0, -1)
+    RIGHT = Point(1, 0)
+    DOWN = Point(0, 1)
+    LEFT = Point(-1, 0)
 
 def shoelace_area(vertices: list[Point]) -> float:
     n = len(vertices)
@@ -60,18 +66,18 @@ def shoelace_area(vertices: list[Point]) -> float:
     area = abs(area) / 2
     return area
 
-def invert_direction(direction: Direction) -> Direction:
+def reverse_direction(direction: Direction) -> Direction:
     match direction:
-        case Direction.Right:
-            return Direction.Left
-        case Direction.Left:
-            return Direction.Right
-        case Direction.Up:
-            return Direction.Down
-        case Direction.Down:
-            return Direction.Up
-        case Direction.Default:
-            return Direction.Default
+        case Direction.RIGHT:
+            return Direction.LEFT
+        case Direction.LEFT:
+            return Direction.RIGHT
+        case Direction.UP:
+            return Direction.DOWN
+        case Direction.DOWN:
+            return Direction.UP
+        case Direction.NONE:
+            return Direction.NONE
 
 def generate_2d_intersection(line1_start: Point, line1_end: Point, line2_start: Point, line2_end: Point) -> tuple[float, float]:
     # https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
@@ -82,7 +88,7 @@ def generate_2d_intersection(line1_start: Point, line1_end: Point, line2_start: 
     y3, y4 = line2_start.y, line2_end.y
 
     try:
-        px = ( (x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4) ) / ( (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4) ) 
+        px = ( (x1*y2-y1*x2)*(x3-x4)-(x1-x2)*(x3*y4-y3*x4) ) / ( (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4) )
         py = ( (x1*y2-y1*x2)*(y3-y4)-(y1-y2)*(x3*y4-y3*x4) ) / ( (x1-x2)*(y3-y4)-(y1-y2)*(x3-x4) )
     except ZeroDivisionError:
         return (math.inf, math.inf)

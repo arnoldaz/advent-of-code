@@ -4,7 +4,8 @@
 disable=
     missing-docstring,
     line-too-long,
-    too-many-return-statements
+    too-many-return-statements,
+    unsubscriptable-object, # disabled due to bugged detection for template parameters
 
 [BASIC]
 
