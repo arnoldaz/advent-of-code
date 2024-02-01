@@ -35,7 +35,7 @@ def parse_arguments() -> ProgramArguments:
 
     return args
 
-def timed_solution(function: Callable[[list[str]], int], function_params: list[str]) -> tuple[int, int]:
+def timed_solution(function: Callable[[list[str]], int | str], function_params: list[str]) -> tuple[int | str, int]:
     start_time = time.perf_counter_ns()
     result = function(function_params)
     end_time = time.perf_counter_ns()

@@ -1,8 +1,9 @@
+# pylint: disable=unused-argument
 
-def silver_solution(_lines: list[str]) -> int:
+def silver_solution(lines: list[str]) -> int:
     # Implement solution
     return -123
 
-def gold_solution(_lines: list[str]) -> int:
+def gold_solution(lines: list[str]) -> int:
     # Implement solution
     return -321
