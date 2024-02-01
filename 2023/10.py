@@ -20,7 +20,7 @@ def get_starting_direction(matrix: Matrix[str], start: Point) -> Direction:
 
     return Direction.NONE
 
-def get_next_location(symbol: str, incoming_direction: Direction) -> Direction:
+def get_next_direction(symbol: str, incoming_direction: Direction) -> Direction:
     match symbol:
         case "|":
             if incoming_direction == Direction.UP:
@@ -84,7 +84,7 @@ def get_pipe_path(matrix: Matrix[str], start: Point) -> dict[Point, str]:
         symbol = matrix.get_symbol(current_location) or ""
         final_path[current_location] = symbol
 
-        new_direction = get_next_location(symbol, current_direction)
+        new_direction = get_next_direction(symbol, current_direction)
         current_location += new_direction
         if current_location == start:
             final_path[current_location] = get_start_char_replacement(first_segment_direction, reverse_direction(new_direction))
@@ -103,13 +103,9 @@ def calculate_internal_tile_count(matrix: Matrix[str], pipe_path: dict[Point, st
             match char:
                 case "." if winding_number % 4 == 2:
                     internal_tile_count += 1
-                case "F":
+                case "F" | "J":
                     winding_number += 1
-                case "J":
-                    winding_number += 1
-                case "L":
-                    winding_number -= 1
-                case "7":
+                case "L" | "7":
                     winding_number -= 1
                 case "-":
                     pass
