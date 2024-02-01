@@ -1,7 +1,7 @@
 from functools import reduce
 
 def parse_input(lines: list[str]) -> list[list[int]]:
-    return [[int(x) for x in line.split(" ")] for line in lines]
+    return [[int(x) for x in line.split()] for line in lines]
 
 def get_sequence_tree(history: list[int]) -> list[list[int]]:
     sequences: list[list[int]] = [history]
