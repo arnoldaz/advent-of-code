@@ -87,8 +87,4 @@ def gold_solution(lines: list[str]) -> int:
     root_sum = root_directory.get_directory_sum()
     additional_space_required = required_disk_space - (total_disk_space - root_sum)
 
-    for directory_sum in sorted(root_directory.get_all_directory_sums()):
-        if directory_sum > additional_space_required:
-            return directory_sum
-
-    return -1
+    return next((directory_sum for directory_sum in sorted(root_directory.get_all_directory_sums()) if directory_sum > additional_space_required), -1)
