@@ -11,16 +11,16 @@ class Point:
         self.y = y
         self.z = z
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{{Point: x={self.x}, y={self.y}, z={self.z}}}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.x, self.y, self.z))
 
-    def __add__(self, other):
+    def __add__(self, other) -> "Point":
         if other is None:
             raise RuntimeError(f"Adding None to Point - {self}")
 
@@ -36,7 +36,23 @@ class Point:
 
         raise RuntimeError(f"Unrecognized variable added to Point - {other}")
 
-    def __eq__(self, other):
+    def __sub__(self, other) -> "Point":
+        if other is None:
+            raise RuntimeError(f"Adding None to Point - {self}")
+
+        if isinstance(other, Point):
+            return Point(self.x - other.x, self.y - other.y, self.z - other.z)
+
+        if isinstance(other, int):
+            return Point(self.x - other, self.y - other, self.z - other)
+
+        if isinstance(other, Direction):
+            direction_point = other.value
+            return Point(self.x - direction_point.x, self.y - direction_point.y, self.z - direction_point.z)
+
+        raise RuntimeError(f"Unrecognized variable added to Point - {other}")
+
+    def __eq__(self, other) -> bool:
         if other is None:
             return False
 
@@ -44,6 +60,9 @@ class Point:
             return self.x == other.x and self.y == other.y and self.z == other.z
 
         raise RuntimeError(f"Unrecognized variable compared to Point - {other}")
+
+    def abs(self) -> "Point":
+        return Point(abs(self.x), abs(self.y), abs(self.z))
 
 INVALID_POINT = Point(-1, -1, -1)
 
