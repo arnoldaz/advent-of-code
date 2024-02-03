@@ -6,7 +6,7 @@ class Matrix[T]:
 
     def __init__(self, data: list[str], cast_type: type):
         assert len(data) > 0 and len(data[0]) > 0
-        self._data = [cast_type(string) for string in data]
+        self._data = [[cast_type(char) for char in string] for string in data]
 
     def height(self) -> int:
         return len(self._data)
@@ -33,6 +33,12 @@ class Matrix[T]:
                     return Point(x, y)
 
         return None
+
+    def get_row(self, row_index: int) -> Optional[list[T]]:
+        return self._data[row_index] if 0 <= row_index <= self.height() else None
+
+    def get_column(self, column_index: int) -> Optional[list[T]]:
+        return [row[column_index] for row in self._data] if 0 <= column_index <= self.width() else None
 
 def rotate_matrix(lines: list[str]):
     return ["".join(line) for line in zip(*lines[::-1])]
