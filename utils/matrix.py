@@ -40,5 +40,5 @@ class Matrix[T]:
     def get_column(self, column_index: int) -> Optional[list[T]]:
         return [row[column_index] for row in self._data] if 0 <= column_index <= self.width() else None
 
-def rotate_matrix(lines: list[str]):
-    return ["".join(line) for line in zip(*lines[::-1])]
+    def rotate_clockwise(self):
+        self._data = list(zip(*reversed(self._data)))

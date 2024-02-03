@@ -6,6 +6,7 @@ disable=
     line-too-long,
     too-many-return-statements,
     unsubscriptable-object, # disabled due to bugged detection for template parameters
+    too-many-branches,
 
 [BASIC]
 
