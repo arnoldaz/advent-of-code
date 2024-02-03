@@ -1,10 +1,7 @@
 
-with open("input.txt") as file:
-    lines = [line.rstrip() for line in file]
-
 def slide_north(lines: list[str]) -> tuple[list[str], bool]:
     new_lines = lines[:]
-    
+
     changed = False
     for i in range(1, len(new_lines)):
         for j in range(0, len(new_lines[i])):
@@ -12,7 +9,7 @@ def slide_north(lines: list[str]) -> tuple[list[str], bool]:
                 new_lines[i] = new_lines[i][:j] + "." + new_lines[i][j+1:]
                 new_lines[i-1] = new_lines[i-1][:j] + "O" + new_lines[i-1][j+1:]
                 changed = True
-                
+
     return new_lines, changed
 
 def calculate_points(final_lines: list[str]) -> int:
@@ -45,11 +42,11 @@ def slide_cycle(lines: list[str], iteration: int) -> tuple[list[str], int]:
 
     new_lines = lines[:]
     changed = True
-    
+
     # north
     while changed:
         new_lines, changed = slide_north(new_lines)
-        
+
     # west
     changed = True
     new_lines = rotate_matrix(new_lines)
@@ -88,18 +85,18 @@ def calculate_actual_iteration_periodic(lines: list[str]) -> int:
 
     new_lines = lines[:]
     for i in range(ITERATION_COUNT):
-        new_lines, iter = slide_cycle(new_lines, i)
+        new_lines, iteration = slide_cycle(new_lines, i)
 
-        if i == iter and not initial_iterations_over:
+        if i == iteration and not initial_iterations_over:
             initial_iterations += 1
         else:
             initial_iterations_over = True
 
         if initial_iterations_over and not repeated_start_recorded:
-            repeated_first_value = iter
+            repeated_first_value = iteration
             repeated_first_index = i
             repeated_start_recorded = True
-        elif repeated_start_recorded and repeated_first_value == iter:
+        elif repeated_start_recorded and repeated_first_value == iteration:
             repeated_rotation_length = i - repeated_first_index
             break
 
@@ -114,6 +111,8 @@ def calculate_all_cycle_load(lines: list[str]) -> int:
 
     return calculate_points(new_lines)
 
-print(f"{get_single_slide_north_points(lines)=}")
-print(f"{calculate_all_cycle_load(lines)=}") # takes ~10s
+def silver_solution(lines: list[str]) -> int:
+    return get_single_slide_north_points(lines)
 
+def gold_solution(lines: list[str]) -> int:
+    return calculate_all_cycle_load(lines)
