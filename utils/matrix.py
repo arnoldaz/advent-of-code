@@ -1,5 +1,5 @@
 from typing import Optional
-from utils.point import Direction, Point
+from utils.point import INVALID_POINT, Direction, Point
 
 class Matrix[T]:
     _data: list[list[T]]
@@ -17,8 +17,8 @@ class Matrix[T]:
     def get_data(self) -> list[list[T]]:
         return self._data
 
-    def get_symbol(self, position: Point) -> Optional[T]:
-        return self._data[position.y][position.x] if self.in_bounds(position) else None
+    def get_symbol(self, position: Point) -> T:
+        return self._data[position.y][position.x]
 
     def in_bounds(self, position: Point) -> bool:
         return 0 <= position.x < self.width() and 0 <= position.y < self.height()
@@ -26,19 +26,19 @@ class Matrix[T]:
     def get_neighbors(self, position: Point) -> list[tuple[Point, Direction]]:
         return [(position + direction.value, direction) for direction in Direction if direction != Direction.NONE and self.in_bounds(position + direction.value)]
 
-    def find_first_character_instance(self, symbol_to_find: T) -> Optional[Point]:
+    def find_first_character_instance(self, symbol_to_find: T) -> Point:
         for y, line in enumerate(self.get_data()):
             for x, char in enumerate(line):
                 if char == symbol_to_find:
                     return Point(x, y)
 
-        return None
+        return INVALID_POINT
 
-    def get_row(self, row_index: int) -> Optional[list[T]]:
-        return self._data[row_index] if 0 <= row_index <= self.height() else None
+    def get_row(self, row_index: int) -> list[T]:
+        return self._data[row_index]
 
-    def get_column(self, column_index: int) -> Optional[list[T]]:
-        return [row[column_index] for row in self._data] if 0 <= column_index <= self.width() else None
+    def get_column(self, column_index: int) -> list[T]:
+        return [row[column_index] for row in self._data]
 
     def rotate_clockwise(self):
         self._data = list(zip(*reversed(self._data)))

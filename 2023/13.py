@@ -36,7 +36,7 @@ def get_horizontal_reflection_line(pattern: Matrix[str], require_single_change: 
                 break
 
             # Check single change but allow passing only once
-            if require_single_change and diff_amount == 0 and nearly_equal(pattern.get_row(i - j) or [], pattern.get_row(i + j + 1) or []):
+            if require_single_change and diff_amount == 0 and nearly_equal(pattern.get_row(i - j), pattern.get_row(i + j + 1)):
                 diff_amount += 1
                 j += 1
                 continue
@@ -53,7 +53,7 @@ def get_horizontal_reflection_line(pattern: Matrix[str], require_single_change: 
     # Need to loop again checking only for difference in those 2 center lines
     diff_amount = 0
     for i in range(0, line_length - 1):
-        if nearly_equal(pattern.get_row(i) or [], pattern.get_row(i + 1) or []):
+        if nearly_equal(pattern.get_row(i), pattern.get_row(i + 1)):
             j = 1
             while True:
                 if i - j < 0 or i + j + 1 > line_length - 1:

@@ -2,9 +2,9 @@ from utils.matrix import Matrix
 from utils.point import Point
 
 def is_tree_visible(forest: Matrix[int], location: Point) -> bool:
-    tree_height = forest.get_symbol(location) or -1
-    row = forest.get_row(location.y) or []
-    column = forest.get_column(location.x) or []
+    tree_height = forest.get_symbol(location)
+    row = forest.get_row(location.y) 
+    column = forest.get_column(location.x)
 
     if all(x < tree_height for x in row[:location.x]): # left
         return True
@@ -21,9 +21,9 @@ def is_tree_visible(forest: Matrix[int], location: Point) -> bool:
     return False
 
 def count_visible_trees(forest: Matrix[int], location: Point) -> int:
-    tree_height = forest.get_symbol(location) or -1
-    row = forest.get_row(location.y) or []
-    column = forest.get_column(location.x) or []
+    tree_height = forest.get_symbol(location)
+    row = forest.get_row(location.y)
+    column = forest.get_column(location.x)
 
     left_trees = row[:location.x]
     left_visible = next((i + 1 for i, x in enumerate(reversed(left_trees)) if x >= tree_height), len(left_trees))

@@ -1,9 +1,9 @@
 from utils.matrix import Matrix
-from utils.point import INVALID_POINT, Direction, Point, reverse_direction
+from utils.point import Direction, Point, reverse_direction
 
 def parse_input(lines: list[str]) -> tuple[Matrix[str], Point]:
     matrix = Matrix(lines, str)
-    return matrix, matrix.find_first_character_instance("S") or INVALID_POINT
+    return matrix, matrix.find_first_character_instance("S")
 
 def get_starting_direction(matrix: Matrix[str], start: Point) -> Direction:
     if matrix.get_symbol(start + Direction.UP) in ("|", "F", "7"):
@@ -81,7 +81,7 @@ def get_pipe_path(matrix: Matrix[str], start: Point) -> dict[Point, str]:
     first_segment_direction = current_direction
     final_path: dict[Point, str] = {}
     while True:
-        symbol = matrix.get_symbol(current_location) or ""
+        symbol = matrix.get_symbol(current_location)
         final_path[current_location] = symbol
 
         new_direction = get_next_direction(symbol, current_direction)
