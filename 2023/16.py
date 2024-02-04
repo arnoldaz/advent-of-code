@@ -1,9 +1,5 @@
 from enum import Enum
 
-file_name = "input.txt"
-with open(file_name) as file:
-    lines = [line.rstrip() for line in file]
-
 class Direction(Enum):
     No = 0
     Up = 1
@@ -12,7 +8,7 @@ class Direction(Enum):
     Left = 4
 
 def debug_print_energized_map(energized_map: list[list[list[Direction]]]):
-    energized_visualization = [["."] * len(lines[0]) for _ in range(len(lines))]
+    energized_visualization = [["."] * len(energized_map[0]) for _ in range(len(energized_map))]
 
     for i, energized_line in enumerate(energized_map):
         for j, energized_tile in enumerate(energized_line):
@@ -47,7 +43,7 @@ def calculate_energized_tiles(lines: list[str]) -> int:
                     next_location = (beam[0]-1, beam[1])
                 case _:
                     next_location = (beam[0], beam[1]) # impossible
-            
+
             if next_location[0] < 0 or next_location[0] >= len(lines[0]) or next_location[1] < 0 or next_location[1] >= len(lines):
                 delete_beams.append(i)
                 continue
@@ -139,7 +135,7 @@ def calculate_energized_tiles_all_edges(lines: list[str]) -> int:
                         next_location = (beam[0]-1, beam[1])
                     case _:
                         next_location = (beam[0], beam[1]) # impossible
-                
+
                 if next_location[0] < 0 or next_location[0] >= x_length or next_location[1] < 0 or next_location[1] >= y_length:
                     delete_beams.append(i)
                     continue
@@ -199,5 +195,8 @@ def calculate_energized_tiles_all_edges(lines: list[str]) -> int:
 
     return max(results)
 
-print(f"{calculate_energized_tiles(lines)=}")
-print(f"{calculate_energized_tiles_all_edges(lines)=}")
+def silver_solution(lines: list[str]) -> int:
+    return calculate_energized_tiles(lines)
+
+def gold_solution(lines: list[str]) -> int:
+    return calculate_energized_tiles_all_edges(lines)
