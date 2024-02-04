@@ -3,7 +3,7 @@ from utils.point import Point
 
 def is_tree_visible(forest: Matrix[int], location: Point) -> bool:
     tree_height = forest.get_symbol(location)
-    row = forest.get_row(location.y) 
+    row = forest.get_row(location.y)
     column = forest.get_column(location.x)
 
     if all(x < tree_height for x in row[:location.x]): # left
