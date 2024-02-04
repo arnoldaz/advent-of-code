@@ -1,80 +1,47 @@
+from utils.matrix import Matrix
 
-def slide_north(lines: list[str]) -> tuple[list[str], bool]:
-    new_lines = lines[:]
+def slide_north_once(platform: Matrix[str]) -> bool:
+    data = platform.get_data()
+    height, width = platform.height(), platform.width()
 
-    changed = False
-    for i in range(1, len(new_lines)):
-        for j in range(0, len(new_lines[i])):
-            if new_lines[i][j] == "O" and new_lines[i-1][j] == ".":
-                new_lines[i] = new_lines[i][:j] + "." + new_lines[i][j+1:]
-                new_lines[i-1] = new_lines[i-1][:j] + "O" + new_lines[i-1][j+1:]
-                changed = True
+    anything_changed = False
+    for y in range(1, height):
+        for x in range(0, width):
+            if data[y][x] == "O" and data[y-1][x] == ".":
+                data[y][x] = "."
+                data[y-1][x] = "O"
+                anything_changed = True
 
-    return new_lines, changed
+    return anything_changed
 
-def calculate_points(final_lines: list[str]) -> int:
-    line_count = len(final_lines)
-    answer = 0
+def slide_north(platform: Matrix[str]):
+    while slide_north_once(platform):
+        pass
 
-    for i, line in enumerate(final_lines):
-        count = line.count("O")
-        answer += (line_count - i) * count
-
-    return answer
-
-def get_single_slide_north_points(lines: list[str]) -> int:
-    changed = True
-    new_lines = lines[:]
-    while changed:
-        new_lines, changed = slide_north(new_lines)
-
-    return calculate_points(new_lines)
-
-def rotate_matrix(lines):
-    return ["".join(line) for line in zip(*lines[::-1])]
-
-lines_cache: dict[str, tuple[list[str], int]] = {}
-
-def slide_cycle(lines: list[str], iteration: int) -> tuple[list[str], int]:
-    hashmap_key = "".join(lines)
-    if hashmap_key in lines_cache:
-        return lines_cache[hashmap_key]
-
-    new_lines = lines[:]
-    changed = True
-
+def slide_cycle_matrix(platform: Matrix[str]):
     # north
-    while changed:
-        new_lines, changed = slide_north(new_lines)
+    slide_north(platform)
 
     # west
-    changed = True
-    new_lines = rotate_matrix(new_lines)
-    while changed:
-        new_lines, changed = slide_north(new_lines)
+    platform.rotate_clockwise()
+    slide_north(platform)
 
-    # sount
-    changed = True
-    new_lines = rotate_matrix(new_lines)
-    while changed:
-        new_lines, changed = slide_north(new_lines)
+    # south
+    platform.rotate_clockwise()
+    slide_north(platform)
 
     # east
-    changed = True
-    new_lines = rotate_matrix(new_lines)
-    while changed:
-        new_lines, changed = slide_north(new_lines)
+    platform.rotate_clockwise()
+    slide_north(platform)
 
     # rotate back to north
-    new_lines = rotate_matrix(new_lines)
+    platform.rotate_clockwise()
 
-    lines_cache[hashmap_key] = (new_lines, iteration)
+def calculate_platform_points(platform: Matrix[str]) -> int:
+    line_count = platform.height()
+    return sum((line_count - y) * line.count("O") for y, line in enumerate(platform.get_data()))
 
-    return new_lines, iteration
-
-ITERATION_COUNT = 1_000_000_000
-
-def calculate_actual_iteration_periodic(lines: list[str]) -> int:
+def perform_cycles(platform: Matrix[str], total_iterations: int):
     initial_iterations = 0
     initial_iterations_over = False
 
@@ -83,9 +50,18 @@ def calculate_actual_iteration_periodic(lines: list[str]) -> int:
     repeated_first_index = -1
     repeated_rotation_length = -1
 
-    new_lines = lines[:]
-    for i in range(ITERATION_COUNT):
-        new_lines, iteration = slide_cycle(new_lines, i)
+    matrix_cache: dict[str, int] = {}
+
+    for i in range(total_iterations):
+        slide_cycle_matrix(platform)
+
+        cache_key = "|".join(["".join(row) for row in platform.get_data()])
+
+        if cache_key in matrix_cache:
+            iteration = matrix_cache.get(cache_key)
+        else:
+            iteration = i
+            matrix_cache[cache_key] = i
 
         if i == iteration and not initial_iterations_over:
             initial_iterations += 1
@@ -100,19 +76,18 @@ def calculate_actual_iteration_periodic(lines: list[str]) -> int:
             repeated_rotation_length = i - repeated_first_index
             break
 
-    return ((ITERATION_COUNT - initial_iterations) % repeated_rotation_length) + initial_iterations
-
-def calculate_all_cycle_load(lines: list[str]) -> int:
-    actual_iterations = calculate_actual_iteration_periodic(lines)
-
-    new_lines = lines[:]
-    for i in range(actual_iterations):
-        new_lines, _ = slide_cycle(new_lines, i)
-
-    return calculate_points(new_lines)
+    required_iteration = ((total_iterations - initial_iterations) % repeated_rotation_length) + initial_iterations - (repeated_rotation_length + 1)
+    required_cached_data = list(matrix_cache.keys())[list(matrix_cache.values()).index(required_iteration)].split("|")
+    platform.initialize(required_cached_data, str)
 
 def silver_solution(lines: list[str]) -> int:
-    return get_single_slide_north_points(lines)
+    platform = Matrix[str](lines, str)
+    slide_north(platform)
+
+    return calculate_platform_points(platform)
 
 def gold_solution(lines: list[str]) -> int:
-    return calculate_all_cycle_load(lines)
+    platform = Matrix[str](lines, str)
+    perform_cycles(platform, 1_000_000_000)
+
+    return calculate_platform_points(platform)

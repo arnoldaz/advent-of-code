@@ -1,12 +1,10 @@
-from typing import Optional
 from utils.point import INVALID_POINT, Direction, Point
 
 class Matrix[T]:
     _data: list[list[T]]
 
     def __init__(self, data: list[str], cast_type: type):
-        assert len(data) > 0 and len(data[0]) > 0
-        self._data = [[cast_type(char) for char in string] for string in data]
+        self.initialize(data, cast_type)
 
     def height(self) -> int:
         return len(self._data)
@@ -16,6 +14,10 @@ class Matrix[T]:
 
     def get_data(self) -> list[list[T]]:
         return self._data
+
+    def initialize(self, data: list[str], cast_type: type):
+        assert len(data) > 0 and len(data[0]) > 0
+        self._data = [[cast_type(char) for char in string] for string in data]
 
     def get_symbol(self, position: Point) -> T:
         return self._data[position.y][position.x]
@@ -41,4 +43,4 @@ class Matrix[T]:
         return [row[column_index] for row in self._data]
 
     def rotate_clockwise(self):
-        self._data = list(zip(*reversed(self._data)))
+        self._data = [list(row) for row in zip(*reversed(self._data))]
