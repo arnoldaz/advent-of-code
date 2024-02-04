@@ -1,202 +1,83 @@
-from enum import Enum
+from utils.list import remove_list_indexes
+from utils.matrix import Matrix
+from utils.point import Direction, Point
 
-class Direction(Enum):
-    No = 0
-    Up = 1
-    Right = 2
-    Down = 3
-    Left = 4
-
-def debug_print_energized_map(energized_map: list[list[list[Direction]]]):
-    energized_visualization = [["."] * len(energized_map[0]) for _ in range(len(energized_map))]
-
-    for i, energized_line in enumerate(energized_map):
-        for j, energized_tile in enumerate(energized_line):
-            if len(energized_tile) > 0:
-                energized_visualization[i][j] = "#"
-
-    print("======================================")
-
-    for energized_line in energized_visualization:
-        for energized_tile in energized_line:
-            print(energized_tile, end="")
-        print()
-
-    print("======================================")
-
-def calculate_energized_tiles(lines: list[str]) -> int:
-    energized_map: list[list[list[Direction]]] = [[[] for _ in range(len(lines[0]))] for _ in range(len(lines))]
-    beams: list[tuple[int, int, Direction]] = [(-1, 0, Direction.Right)]
+def calculate_energized_tiles(tile_map: Matrix[str], starting_location: tuple[Point, Direction]) -> int:
+    height, width = tile_map.height(), tile_map.width()
+    energized_map: list[list[list[Direction]]] = [[[] for _ in range(width)] for _ in range(height)]
+    beams: list[tuple[Point, Direction]] = [starting_location]
     delete_beams: list[int] = []
 
     while len(beams) > 0:
-        for i, beam in enumerate(beams[:]):
-            direction = beam[2]
-            match direction:
-                case Direction.Up:
-                    next_location = (beam[0], beam[1]-1)
-                case Direction.Right:
-                    next_location = (beam[0]+1, beam[1])
-                case Direction.Down:
-                    next_location = (beam[0], beam[1]+1)
-                case Direction.Left:
-                    next_location = (beam[0]-1, beam[1])
-                case _:
-                    next_location = (beam[0], beam[1]) # impossible
+        for i, (beam_location, beam_direction) in enumerate(beams[:]):
+            next_location = beam_location + beam_direction
 
-            if next_location[0] < 0 or next_location[0] >= len(lines[0]) or next_location[1] < 0 or next_location[1] >= len(lines):
+            if not tile_map.in_bounds(next_location):
                 delete_beams.append(i)
                 continue
 
-            if direction in energized_map[next_location[1]][next_location[0]]:
+            if beam_direction in energized_map[next_location.y][next_location.x]:
                 delete_beams.append(i)
                 continue
 
-            energized_map[next_location[1]][next_location[0]].append(direction)
-            next_symbol = lines[next_location[1]][next_location[0]]
+            energized_map[next_location.y][next_location.x].append(beam_direction)
+            next_symbol = tile_map.get_symbol(next_location)
 
             match next_symbol:
                 case ".":
-                    beams[i] = (next_location[0], next_location[1], direction)
-                case "|" if direction == Direction.Up or direction == Direction.Down:
-                    beams[i] = (next_location[0], next_location[1], direction)
-                case "|" if direction == Direction.Left or direction == Direction.Right:
+                    beams[i] = (next_location, beam_direction)
+                case "|" if beam_direction in (Direction.UP, Direction.DOWN):
+                    beams[i] = (next_location, beam_direction)
+                case "|" if beam_direction in (Direction.LEFT, Direction.RIGHT):
                     delete_beams.append(i)
-                    beams.append((next_location[0], next_location[1], Direction.Up))
-                    beams.append((next_location[0], next_location[1], Direction.Down))
-                case "-" if direction == Direction.Left or direction == Direction.Right:
-                    beams[i] = (next_location[0], next_location[1], direction)
-                case "-" if direction == Direction.Up or direction == Direction.Down:
+                    beams.append((next_location, Direction.UP))
+                    beams.append((next_location, Direction.DOWN))
+                case "-" if beam_direction in (Direction.LEFT, Direction.RIGHT):
+                    beams[i] = (next_location, beam_direction)
+                case "-" if beam_direction in (Direction.UP, Direction.DOWN):
                     delete_beams.append(i)
-                    beams.append((next_location[0], next_location[1], Direction.Left))
-                    beams.append((next_location[0], next_location[1], Direction.Right))
-                case "\\" if direction == Direction.Left:
-                    beams[i] = (next_location[0], next_location[1], Direction.Up)
-                case "\\" if direction == Direction.Up:
-                    beams[i] = (next_location[0], next_location[1], Direction.Left)
-                case "\\" if direction == Direction.Right:
-                    beams[i] = (next_location[0], next_location[1], Direction.Down)
-                case "\\" if direction == Direction.Down:
-                    beams[i] = (next_location[0], next_location[1], Direction.Right)
-                case "/" if direction == Direction.Left:
-                    beams[i] = (next_location[0], next_location[1], Direction.Down)
-                case "/" if direction == Direction.Up:
-                    beams[i] = (next_location[0], next_location[1], Direction.Right)
-                case "/" if direction == Direction.Right:
-                    beams[i] = (next_location[0], next_location[1], Direction.Up)
-                case "/" if direction == Direction.Down:
-                    beams[i] = (next_location[0], next_location[1], Direction.Left)
+                    beams.append((next_location, Direction.LEFT))
+                    beams.append((next_location, Direction.RIGHT))
+                case "\\" if beam_direction == Direction.LEFT:
+                    beams[i] = (next_location, Direction.UP)
+                case "\\" if beam_direction == Direction.UP:
+                    beams[i] = (next_location, Direction.LEFT)
+                case "\\" if beam_direction == Direction.RIGHT:
+                    beams[i] = (next_location, Direction.DOWN)
+                case "\\" if beam_direction == Direction.DOWN:
+                    beams[i] = (next_location, Direction.RIGHT)
+                case "/" if beam_direction == Direction.LEFT:
+                    beams[i] = (next_location, Direction.DOWN)
+                case "/" if beam_direction == Direction.UP:
+                    beams[i] = (next_location, Direction.RIGHT)
+                case "/" if beam_direction == Direction.RIGHT:
+                    beams[i] = (next_location, Direction.UP)
+                case "/" if beam_direction == Direction.DOWN:
+                    beams[i] = (next_location, Direction.LEFT)
 
-        delete_beams.reverse()
-        for delete_beam in delete_beams:
-            beams.pop(delete_beam)
+        remove_list_indexes(beams, delete_beams)
         delete_beams = []
 
-    final_result = 0
+    return sum(1 for energized_line in energized_map for energized_tile in energized_line if len(energized_tile) > 0)
 
-    for i, energized_line in enumerate(energized_map):
-        for energized_tile in energized_line:
-            if len(energized_tile) > 0:
-                final_result += 1
+def calculate_energized_tiles_all_edges(tile_map: Matrix[str]) -> int:
+    height, width = tile_map.height(), tile_map.width()
+    all_possible_starts: list[tuple[Point, Direction]] = []
 
-    return final_result
+    for i in range(width):
+        all_possible_starts.append((Point(i, -1), Direction.DOWN))
+        all_possible_starts.append((Point(i, height), Direction.UP))
 
-def calculate_energized_tiles_all_edges(lines: list[str]) -> int:
-    results: list[int] = []
-    all_possible_starts: list[tuple[int, int, Direction]] = []
+    for i in range(height):
+        all_possible_starts.append((Point(-1, i), Direction.RIGHT))
+        all_possible_starts.append((Point(width, i), Direction.LEFT))
 
-    x_length = len(lines[0])
-    y_length = len(lines)
-
-    for i in range(x_length):
-        all_possible_starts.append((i, -1, Direction.Down))
-        all_possible_starts.append((i, y_length, Direction.Up))
-
-    for i in range(y_length):
-        all_possible_starts.append((-1, i, Direction.Right))
-        all_possible_starts.append((x_length, i, Direction.Left))
-
-    for possible_start in all_possible_starts:
-        energized_map: list[list[list[Direction]]] = [[[] for _ in range(x_length)] for _ in range(y_length)]
-        beams: list[tuple[int, int, Direction]] = [possible_start]
-        delete_beams: list[int] = []
-
-        while len(beams) > 0:
-            for i, beam in enumerate(beams[:]):
-                direction = beam[2]
-                match direction:
-                    case Direction.Up:
-                        next_location = (beam[0], beam[1]-1)
-                    case Direction.Right:
-                        next_location = (beam[0]+1, beam[1])
-                    case Direction.Down:
-                        next_location = (beam[0], beam[1]+1)
-                    case Direction.Left:
-                        next_location = (beam[0]-1, beam[1])
-                    case _:
-                        next_location = (beam[0], beam[1]) # impossible
-
-                if next_location[0] < 0 or next_location[0] >= x_length or next_location[1] < 0 or next_location[1] >= y_length:
-                    delete_beams.append(i)
-                    continue
-
-                if direction in energized_map[next_location[1]][next_location[0]]:
-                    delete_beams.append(i)
-                    continue
-
-                energized_map[next_location[1]][next_location[0]].append(direction)
-                next_symbol = lines[next_location[1]][next_location[0]]
-
-                match next_symbol:
-                    case ".":
-                        beams[i] = (next_location[0], next_location[1], direction)
-                    case "|" if direction == Direction.Up or direction == Direction.Down:
-                        beams[i] = (next_location[0], next_location[1], direction)
-                    case "|" if direction == Direction.Left or direction == Direction.Right:
-                        delete_beams.append(i)
-                        beams.append((next_location[0], next_location[1], Direction.Up))
-                        beams.append((next_location[0], next_location[1], Direction.Down))
-                    case "-" if direction == Direction.Left or direction == Direction.Right:
-                        beams[i] = (next_location[0], next_location[1], direction)
-                    case "-" if direction == Direction.Up or direction == Direction.Down:
-                        delete_beams.append(i)
-                        beams.append((next_location[0], next_location[1], Direction.Left))
-                        beams.append((next_location[0], next_location[1], Direction.Right))
-                    case "\\" if direction == Direction.Left:
-                        beams[i] = (next_location[0], next_location[1], Direction.Up)
-                    case "\\" if direction == Direction.Up:
-                        beams[i] = (next_location[0], next_location[1], Direction.Left)
-                    case "\\" if direction == Direction.Right:
-                        beams[i] = (next_location[0], next_location[1], Direction.Down)
-                    case "\\" if direction == Direction.Down:
-                        beams[i] = (next_location[0], next_location[1], Direction.Right)
-                    case "/" if direction == Direction.Left:
-                        beams[i] = (next_location[0], next_location[1], Direction.Down)
-                    case "/" if direction == Direction.Up:
-                        beams[i] = (next_location[0], next_location[1], Direction.Right)
-                    case "/" if direction == Direction.Right:
-                        beams[i] = (next_location[0], next_location[1], Direction.Up)
-                    case "/" if direction == Direction.Down:
-                        beams[i] = (next_location[0], next_location[1], Direction.Left)
-
-            delete_beams.reverse()
-            for delete_beam in delete_beams:
-                beams.pop(delete_beam)
-            delete_beams = []
-
-        final_result = 0
-
-        for i, energized_line in enumerate(energized_map):
-            for energized_tile in energized_line:
-                if len(energized_tile) > 0:
-                    final_result += 1
-
-        results.append(final_result)
-
-    return max(results)
+    return max(calculate_energized_tiles(tile_map, possible_start) for possible_start in all_possible_starts)
 
 def silver_solution(lines: list[str]) -> int:
-    return calculate_energized_tiles(lines)
+    tile_map = Matrix[str](lines, str)
+    return calculate_energized_tiles(tile_map, (Point(-1, 0), Direction.RIGHT))
 
 def gold_solution(lines: list[str]) -> int:
-    return calculate_energized_tiles_all_edges(lines)
+    tile_map = Matrix[str](lines, str)
+    return calculate_energized_tiles_all_edges(tile_map)
