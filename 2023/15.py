@@ -1,9 +1,6 @@
-
-with open("input.txt") as file:
-    lines = [line.rstrip() for line in file]
-
-line = lines[0] # only single line
-sequence = line.split(",")
+def parse_input(lines: list[str]) -> list[str]:
+    line = lines[0] # only single line
+    return line.split(",")
 
 def calc_hash(step: str) -> int:
     current_value = 0
@@ -21,8 +18,8 @@ def ascii_calculation(sequence: list[str]) -> int:
 
 def hashmap_calculation(sequence: list[str]) -> int:
     hashmap: dict[int, list[tuple[str, int]]] = {}
-    
-    for step in sequence:      
+
+    for step in sequence:
         equals = step.split("=")
         if len(equals) > 1:
             index = calc_hash(equals[0])
@@ -37,16 +34,16 @@ def hashmap_calculation(sequence: list[str]) -> int:
                 else:
                     found = False
                     secondary_index = -1 # impossible to use
-                
+
                 if not found:
                     hashmap[index].append((equals[0], value))
                 else:
                     hashmap[index][secondary_index] = (equals[0], value)
             else:
                 hashmap[index] = [(equals[0], value)]
-                
+
             continue
-        
+
         equals = step.split("-")
         if len(equals) > 1:
             index = calc_hash(equals[0])
@@ -60,21 +57,25 @@ def hashmap_calculation(sequence: list[str]) -> int:
                 else:
                     found = False
                     secondary_index = -1 # impossible to use
-                    
+
                 if found:
                     hashmap[index].pop(secondary_index)
-            
+
             continue
-    
+
     final_value = 0
-    
+
     for key in hashmap:
         value_array = hashmap[key]
         for i, value in enumerate(value_array):
             final_value += (key + 1) * (i + 1) * value[1]
-    
+
     return final_value
-    
-print(f"{ascii_calculation(sequence)=}")
-print(f"{hashmap_calculation(sequence)=}")
-    
+
+def silver_solution(lines: list[str]) -> int:
+    sequence = parse_input(lines)
+    return ascii_calculation(sequence)
+
+def gold_solution(lines: list[str]) -> int:
+    sequence = parse_input(lines)
+    return hashmap_calculation(sequence)
