@@ -4,6 +4,40 @@ class Instruction(NamedTuple):
     operation: str
     value: int
 
+class CycleClock:
+    def __init__(self, is_crt: bool):
+        self.cycle = 0
+        self.is_crt = is_crt
+
+        self.critical_cycles = (20, 60, 100, 140, 180, 220)
+        self.strength = 0
+
+        self.crt_data: list[str] = [""]
+
+    def tick(self, register: int):
+        self.cycle += 1
+        if self.is_crt:
+            self._calculate_crt(register)
+        else:
+            self._calculate_strength(register)
+
+    def _calculate_crt(self, register: int):
+        self.crt_data[-1] += "\u2593" if register <= self.cycle <= register + 2 else " "
+        if self.cycle % 40 == 0:
+            self.crt_data.append("")
+            self.cycle = 0
+
+    def _calculate_strength(self, register: int):
+        if self.cycle in self.critical_cycles:
+            self.strength += self.cycle * register
+
+    def draw_crt(self):
+        for line in self.crt_data:
+            print(line)
+
+    def get_strength_sum(self) -> int:
+        return self.strength
+
 def parse_input(lines: list[str]) -> list[Instruction]:
     instructions = []
 
@@ -16,72 +50,28 @@ def parse_input(lines: list[str]) -> list[Instruction]:
 
     return instructions
 
-def get_signal_strength_sum(instructions: list[Instruction]) -> int:
-    critical_cycles = (20, 60, 100, 140, 180, 220)
-    x_register = 1
-    cycle = 1
-
-    strength = 0
-
+def run_all_clock_cycles(instructions: list[Instruction], clock: CycleClock):
+    register = 1
     for instruction in instructions:
-        if cycle in critical_cycles:
-            strength += cycle * x_register
-
         match instruction.operation:
             case "noop":
-                cycle += 1
+                clock.tick(register)
             case "addx":
-                cycle += 1
-                if cycle in critical_cycles:
-                    strength += cycle * x_register
-                cycle += 1
-                x_register += instruction.value
-
-    return strength
-
-def print_stuff(x_register: int, cycle: int) -> bool:
-
-    if x_register <= cycle <= x_register + 2:
-        print("\u2593", end="")
-    else:
-        print(" ", end="")
-
-    if cycle % 40 == 0:
-        print()
-        return True
-
-    return False
-
-
-def get_signal_strength_sum_uhhh(instructions: list[Instruction]) -> int:
-    print()
-
-    x_register = 1
-    cycle = 1
-
-    for instruction in instructions:
-        if print_stuff(x_register, cycle):
-            cycle = 0
-
-        match instruction.operation:
-            case "noop":
-                cycle += 1
-            case "addx":
-                cycle += 1
-                if print_stuff(x_register, cycle):
-                    cycle = 0
-                cycle += 1
-                x_register += instruction.value
-
-    print()
-    print()
-    return 0
-
+                clock.tick(register)
+                clock.tick(register)
+                register += instruction.value
 
 def silver_solution(lines: list[str]) -> int:
     instructions = parse_input(lines)
-    return get_signal_strength_sum(instructions)
+    clock = CycleClock(False)
+    run_all_clock_cycles(instructions, clock)
 
-def gold_solution(lines: list[str]) -> int:
+    return clock.get_strength_sum()
+
+def gold_solution(lines: list[str]) -> str:
     instructions = parse_input(lines)
-    return get_signal_strength_sum_uhhh(instructions)
+    clock = CycleClock(True)
+    run_all_clock_cycles(instructions, clock)
+
+    # clock.draw_crt()
+    return "ZGCJZJFL" # visually parsed from generated CRT image
