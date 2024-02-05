@@ -11,7 +11,7 @@
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}",
             "justMyCode": true,
-            "args": ["-y", "${relativeFileDirname}", "-d", "${fileBasenameNoExtension}"],
+            "args": ["-y", "${relativeFileDirname}", "-d", "${fileBasenameNoExtension}", "-t"],
         }
     ]
 }

@@ -52,6 +52,12 @@ class Point:
 
         raise RuntimeError(f"Unrecognized variable added to Point - {other}")
 
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return Point(self.x * other, self.y * other, self.z * other)
+
+        raise RuntimeError(f"Unrecognized variable multiplied with Point - {other}")
+
     def __eq__(self, other) -> bool:
         if other is None:
             return False
@@ -72,6 +78,12 @@ class Direction(Enum):
     RIGHT = Point(1, 0)
     DOWN = Point(0, 1)
     LEFT = Point(-1, 0)
+
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return self.value * other
+
+        raise RuntimeError(f"Unrecognized variable multiplied with Direction - {other}")
 
 def shoelace_area(vertices: list[Point]) -> float:
     n = len(vertices)
