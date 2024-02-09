@@ -22,7 +22,7 @@ def parse_input(lines: list[str]) -> tuple[Matrix[int], Point, Point]:
 
     return Matrix[int](data, int), start, end
 
-def djikstra_search(grid: Matrix[int], starts: list[Point], end: Point) -> dict[Point, Point]:
+def djikstra_search(grid: Matrix[int], starts: set[Point], end: Point) -> dict[Point, Point]:
     frontier = queue.Queue[Point]()
     came_from: dict[Point, Point] = {}
     cost_so_far: dict[Point, int] = {}
@@ -49,7 +49,7 @@ def djikstra_search(grid: Matrix[int], starts: list[Point], end: Point) -> dict[
 
     return came_from
 
-def reconstruct_shortest_path(came_from: dict[Point, Point], starts: list[Point], end: Point) -> Optional[list[Point]]:
+def reconstruct_shortest_path(came_from: dict[Point, Point], starts: set[Point], end: Point) -> Optional[list[Point]]:
     current = end
     path: list[Point] = []
 
@@ -65,16 +65,16 @@ def reconstruct_shortest_path(came_from: dict[Point, Point], starts: list[Point]
 
     return path
 
-def get_shortest_path_length(grid: Matrix[int], starts: list[Point], end: Point) -> Optional[int]:
+def get_shortest_path_length(grid: Matrix[int], starts: set[Point], end: Point) -> Optional[int]:
     came_from = djikstra_search(grid, starts, end)
     path = reconstruct_shortest_path(came_from, starts, end)
     return len(path) if path is not None else None
 
 def silver_solution(lines: list[str]) -> int:
     grid, start, end = parse_input(lines)
-    return get_shortest_path_length(grid, [start], end) or -1
+    return get_shortest_path_length(grid, set([start]), end) or -1
 
 def gold_solution(lines: list[str]) -> int:
     grid, _, end = parse_input(lines)
     possible_starts = [point for y, line in enumerate(grid.get_data()) for x, _ in enumerate(line) if (point := Point(x, y)) and grid.get_symbol(point) == 1]
-    return get_shortest_path_length(grid, possible_starts, end) or -1
+    return get_shortest_path_length(grid, set(possible_starts), end) or -1
