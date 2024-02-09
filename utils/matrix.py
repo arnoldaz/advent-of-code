@@ -22,6 +22,9 @@ class Matrix[T]:
     def get_symbol(self, position: Point) -> T:
         return self._data[position.y][position.x]
 
+    def set_symbol(self, position: Point, symbol: T):
+        self._data[position.y][position.x] = symbol
+
     def in_bounds(self, position: Point) -> bool:
         return 0 <= position.x < self.width() and 0 <= position.y < self.height()
 
