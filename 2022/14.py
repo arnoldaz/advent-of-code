@@ -86,7 +86,8 @@ def calculate_sand_amount(matrix: Matrix[int], offset: Point) -> int:
     return sum(number == SAND_SYMBOL for line in matrix.get_data() for number in line)
 
 def visualize_matrix(matrix: Matrix[int]):
-    from colorama import Fore # pylint: disable=import-outside-toplevel
+    # pylint: disable-next=import-outside-toplevel
+    from colorama import Fore
 
     height, width = matrix.height(), matrix.width()
     for y in range(height):
