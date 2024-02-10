@@ -9,7 +9,7 @@ from utils.aoc import copy_template_file, get_solution_module_path, read_input_f
 
 class ProgramArguments(NamedTuple):
     year: int
-    day: int
+    day: int | tuple[int, int]
     silver: bool
     gold: bool
     test: bool
@@ -18,22 +18,38 @@ class ProgramArguments(NamedTuple):
 def parse_arguments() -> ProgramArguments:
     parser = argparse.ArgumentParser(prog="Advent of Code runner", description="Runs Advent of Code solutions.")
     parser.add_argument("-y", "--year", type=int, help="solution year", required=True)
-    parser.add_argument("-d", "--day", type=int, help="solution day", required=True)
+    parser.add_argument("-d", "--day", type=lambda arg: int(arg) if arg.isdecimal() else arg, help="solution day or day range", required=True)
     parser.add_argument("-s", "--silver", action="store_true", help="only run silver solution")
     parser.add_argument("-g", "--gold", action="store_true", help="only run gold solution")
     parser.add_argument("-t", "--test", action="store_true", help="run with test input")
     parser.add_argument("-a", "--add-template", action="store_true", help="add template solution module")
-
-    untyped_args = parser.parse_args()
-    args = ProgramArguments(untyped_args.year, untyped_args.day, untyped_args.silver, untyped_args.gold, untyped_args.test, untyped_args.add_template)
+    args = parser.parse_args()
 
     if not 2015 <= args.year <= 2025:
         parser.error("Year (-y/--year) is not a valid Advent of Code year.")
 
-    if not 1 <= args.day <= 25:
-        parser.error("Day (-d/--day) is not a valid Advent of Code day.")
+    day: int | tuple[int, int]
+    if isinstance(args.day, str):
+        if "-" not in args.day:
+            parser.error("Day (-d/--day) range doesn't have '-' symbol.")
 
-    return args
+        first_day, last_day = args.day.split("-")
+        if not first_day.isdecimal() or not last_day.isdecimal():
+            parser.error("Day (-d/--day) ranges are not valid numbers.")
+
+        first_day_number, last_day_number = int(first_day), int(last_day)
+        if not 1 <= first_day_number <= 25 or not 1 <= last_day_number <= 25:
+            parser.error("Day (-d/--day) ranges are not valid Advent of Code days.")
+
+        day = (first_day_number, last_day_number)
+
+    if isinstance(args.day, int):
+        if not 1 <= args.day <= 25:
+            parser.error("Day (-d/--day) is not a valid Advent of Code day.")
+
+        day = args.day
+
+    return ProgramArguments(args.year, day, args.silver, args.gold, args.test, args.add_template)
 
 def timed_solution(function: Callable[[list[str]], int | str], function_params: list[str]) -> tuple[int | str, int]:
     start_time = time.perf_counter_ns()
@@ -74,9 +90,30 @@ def run_solution(year: int, day: int, run_silver: bool, run_gold: bool, test_inp
         result, time_taken = timed_solution(module.gold_solution, input_data)
         print(f"Gold solution:   {result:>20} | time {time_taken / 1e9}s")
 
+def run_all_solutions(year: int, day_range: tuple[int, int]):
+    total_silver_time, total_gold_time = 0, 0
+    first_day, last_day = day_range
+    for day in range(first_day, last_day + 1):
+        module = load_module(year, day)
+        input_data = read_input_file(year, day)
+
+        _, silver_time_taken = timed_solution(module.silver_solution, input_data)
+        _, gold_time_taken = timed_solution(module.gold_solution, input_data)
+        total_silver_time += silver_time_taken
+        total_gold_time += gold_time_taken
+
+        print(f"[Day {day:>2} time] Silver: {(silver_time_taken / 1e9):>12} | Gold: {(gold_time_taken / 1e9):>12}")
+
+    print(f"{"-" * 35}+{"-" * 19}")
+    print(f"[Total times] Silver: {(total_silver_time / 1e9):>12} | Gold: {(total_gold_time / 1e9):>12}")
+
 def main():
     args = parse_arguments()
     load_dotenv()
+
+    if not isinstance(args.day, int):
+        run_all_solutions(args.year, args.day)
+        return
 
     if args.add_template:
         copy_template_file(args.year, args.day)
