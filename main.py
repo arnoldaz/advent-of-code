@@ -102,7 +102,7 @@ def run_all_solutions(year: int, day_range: tuple[int, int]):
         total_silver_time += silver_time_taken
         total_gold_time += gold_time_taken
 
-        print(f"[Day {day:>2} time] Silver: {(silver_time_taken / 1e9):>12} | Gold: {(gold_time_taken / 1e9):>12}")
+        print(f"[Day {day:0>2} time] Silver: {(silver_time_taken / 1e9):>12} | Gold: {(gold_time_taken / 1e9):>12}")
 
     print(f"{"-" * 35}+{"-" * 19}")
     print(f"[Total times] Silver: {(total_silver_time / 1e9):>12} | Gold: {(total_gold_time / 1e9):>12}")
