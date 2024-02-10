@@ -1,5 +1,5 @@
 from typing import Iterator, NamedTuple
-from utils.point import Point
+from utils.point import INVALID_POINT, Point
 from utils.string import get_ints
 
 class Sensor(NamedTuple):
@@ -16,29 +16,25 @@ def parse_input(lines: list[str]) -> list[Sensor]:
 def manhattan_distance(point1: Point, point2: Point) -> int:
     return abs(point1.x - point2.x) + abs(point1.y - point2.y)
 
-def silver_solution(lines: list[str]) -> int:
-    sensors = parse_input(lines)
-    y = 2_000_000
+def get_inside_sensor_line(sensor: Sensor, line_index: int) -> Iterator[Point]:
+    distance = manhattan_distance(sensor.location, sensor.closest_beacon)
+    up = Point(sensor.location.x, sensor.location.y - distance)
+    down = Point(sensor.location.x, sensor.location.y + distance)
 
-    distances = [manhattan_distance(sensor.location, sensor.closest_beacon) for sensor in sensors]
-    max_distance = max(distances)
+    if not up.y <= line_index <= down.y:
+        yield INVALID_POINT
 
-    min_x = min(sensor.closest_beacon.x for sensor in sensors) - max_distance
-    max_x = max(sensor.closest_beacon.x for sensor in sensors) + max_distance
+    center = Point(sensor.location.x, line_index)
+    yield center
 
-    counter = 0
-    for x in range(min_x, max_x + 1):
-        point = Point(x, y)
-        block = False
-        for i, sensor in enumerate(sensors):
-            if point != sensor.closest_beacon and manhattan_distance(point, sensor.location) <= distances[i]:
-                block = True
-                break
+    current_left = center
+    current_right = center
 
-        if block:
-            counter += 1
-
-    return counter
+    while manhattan_distance(sensor.location, current_left) <= distance:
+        yield current_left
+        yield current_right
+        current_left += Point(-1, 0)
+        current_right += Point(1, 0)
 
 def get_outside_sensor_path(sensor: Sensor) -> Iterator[Point]:
     distance = manhattan_distance(sensor.location, sensor.closest_beacon)
@@ -59,6 +55,19 @@ def get_outside_sensor_path(sensor: Sensor) -> Iterator[Point]:
         yield current_up
         yield current_right
         yield current_down
+
+def silver_solution(lines: list[str]) -> int:
+    sensors = parse_input(lines)
+    building_locations = set(sensor.closest_beacon for sensor in sensors) | set(sensor.location for sensor in sensors)
+    y = 2_000_000
+
+    result: set[int] = set()
+    for sensor in sensors:
+        for point in get_inside_sensor_line(sensor, y):
+            if point != INVALID_POINT and point not in building_locations:
+                result.add(point.x)
+
+    return len(result)
 
 def gold_solution(lines: list[str]) -> int:
     sensors = parse_input(lines)
