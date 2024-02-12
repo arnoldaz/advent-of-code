@@ -1,6 +1,6 @@
 import queue
 import re
-from typing import NamedTuple
+from typing import Callable, NamedTuple, TypeVar
 
 class ValveData(NamedTuple):
     flow_rate: int
@@ -87,6 +87,16 @@ class ValvePath:
             self.update_flow()
             self.timer += 1
 
+T = TypeVar("T")
+def partition(predicate: Callable[[T], bool], iterable: list[T]) -> tuple[list[T], list[T]]:
+    trues = []
+    falses = []
+    for item in iterable:
+        if predicate(item):
+            trues.append(item)
+        else:
+            falses.append(item)
+    return trues, falses
 
 def navigate_path(valves: dict[str, ValveData]):
     good_valves = [name for name, data in valves.items() if data.flow_rate > 0]
@@ -94,8 +104,19 @@ def navigate_path(valves: dict[str, ValveData]):
 
     valve_paths: list[ValvePath] = [ValvePath(start_valve, valves)]
 
-    while any(x.timer <= 30 for x in valve_paths):
-        print(len(valve_paths))
+    max_value = 0
+
+    while True:
+        print("before", len(valve_paths))
+        valve_paths, finished_valve_paths = partition(lambda x: x.timer <= ValvePath.MAX_TIMER, valve_paths)
+        print("after", len(valve_paths))
+
+        if len(finished_valve_paths) > 0:
+            max_value = max(max(x.total_pressure for x in finished_valve_paths), max_value)
+
+        if len(valve_paths) == 0:
+            break
+
         for valve_path in valve_paths[:]:
             destinations = [x for x in good_valves if x not in valve_path.open_valves]
             paths = get_paths_bfs(valves, valve_path.position, destinations)
@@ -117,7 +138,7 @@ def navigate_path(valves: dict[str, ValveData]):
     # for path in valve_paths[:]:
     #     print(path.position, path.open_valves, path.total_pressure, path.timer)
 
-    return max(x.total_pressure for x in valve_paths)
+    return max_value
 
 def silver_solution(lines: list[str]) -> int:
     valves = parse_input(lines)
