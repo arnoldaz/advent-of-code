@@ -1,10 +1,6 @@
 from typing import NamedTuple
 from enum import Enum
 
-file_name = "input.txt"
-with open(file_name) as file:
-    lines = [line.rstrip() for line in file]
-
 class Direction(Enum):
     No = 0
     Up = 1
@@ -17,71 +13,77 @@ class DigStep(NamedTuple):
     amount: int
     rgb: str
 
-dig_steps: list[DigStep] = []
-width = 1
-height = 1
-current_width = 1
-current_height = 1
-min_width = 0
-min_height = 0
+def parse_input(lines: list[str]) -> list[DigStep]:
+    dig_steps: list[DigStep] = []
+    width = 1
+    height = 1
+    current_width = 1
+    current_height = 1
+    min_width = 0
+    min_height = 0
 
-for line in lines:
-    direction_string, amount_string, rgb_string = line.split(" ")
-    amount = int(amount_string)
-    rgb = rgb_string.removeprefix("(#").removesuffix(")")
-    match direction_string:
-        case "R":
-            direction = Direction.Right
-            current_width += amount
-        case "L":
-            direction = Direction.Left
-            current_width -= amount
-        case "U":
-            direction = Direction.Up
-            current_height -= amount
-        case "D":
-            direction = Direction.Down
-            current_height += amount
-        case _:
-            direction = Direction.No
-    
-    if current_height > height:
-        height = current_height
-    if current_width > width:
-        width = current_width
-    if current_height < min_height:
-        min_height = current_height
-    if current_width < min_width:
-        min_width = current_width
-    
-    dig_steps.append(DigStep(direction, amount, rgb))
+    for line in lines:
+        direction_string, amount_string, rgb_string = line.split(" ")
+        amount = int(amount_string)
+        rgb = rgb_string.removeprefix("(#").removesuffix(")")
+        match direction_string:
+            case "R":
+                direction = Direction.Right
+                current_width += amount
+            case "L":
+                direction = Direction.Left
+                current_width -= amount
+            case "U":
+                direction = Direction.Up
+                current_height -= amount
+            case "D":
+                direction = Direction.Down
+                current_height += amount
+            case _:
+                direction = Direction.No
 
-new_dig_steps: list[DigStep] = []
+        if current_height > height:
+            height = current_height
+        if current_width > width:
+            width = current_width
+        if current_height < min_height:
+            min_height = current_height
+        if current_width < min_width:
+            min_width = current_width
 
-for step in dig_steps:
-    hex_string = step.rgb[:-1]
-    distance = int(hex_string, 16)
-    match step.rgb[-1]:
-        case "0":
-            direction = Direction.Right
-        case "1":
-            direction = Direction.Down
-        case "2":
-            direction = Direction.Left
-        case "3":
-            direction = Direction.Up
-        case _:
-            direction = Direction.No
-    
-    new_dig_steps.append(DigStep(direction, distance, ""))
+        dig_steps.append(DigStep(direction, amount, rgb))
+
+    return dig_steps
+
+def get_new_dig_steps(dig_steps: list[DigStep]) -> list[DigStep]:
+    new_dig_steps: list[DigStep] = []
+
+    for step in dig_steps:
+        hex_string = step.rgb[:-1]
+        distance = int(hex_string, 16)
+        match step.rgb[-1]:
+            case "0":
+                direction = Direction.Right
+            case "1":
+                direction = Direction.Down
+            case "2":
+                direction = Direction.Left
+            case "3":
+                direction = Direction.Up
+            case _:
+                direction = Direction.No
+
+        new_dig_steps.append(DigStep(direction, distance, ""))
+
+    return new_dig_steps
 
 def create_2d_map(steps: list[DigStep], positive_width: int, positive_height: int, negative_width: int, negative_height: int) -> list[str]:
     map = [[["."] for _ in range(positive_width - negative_width + 1)] for _ in range(positive_height - negative_height + 1)]
-    
+
     current_x = -negative_width + 1
     current_y = -negative_height + 1
     map[current_y][current_x][0] = "#"
-    
+
     for step in steps:
         match step.direction:
             case Direction.Right:
@@ -100,7 +102,7 @@ def create_2d_map(steps: list[DigStep], positive_width: int, positive_height: in
                 for _ in range(step.amount):
                     current_y += 1
                     map[current_y][current_x][0] = "#"
-    
+
     return ["".join("".join(single_char_list) for single_char_list in line) for line in map]
 
 # Debugging code for visualization
@@ -194,7 +196,7 @@ def get_vertices(steps: list[DigStep]) -> list[Point]:
         if is_counter_clockwise:
             direction = invert_direction(step.direction)
         else:
-            direction = step.direction 
+            direction = step.direction
 
         match direction:
             case Direction.Right:
@@ -214,7 +216,7 @@ def get_vertices(steps: list[DigStep]) -> list[Point]:
                         vertices.append(current_node) # corner └-
                         current_node = Point(current_node.x - 0.5, current_node.y)
                         pass
-                
+
                 current_node = Point(current_node.x + step.amount, current_node.y)
                 previous_direction = Direction.Right
             case Direction.Left:
@@ -271,7 +273,7 @@ def get_vertices(steps: list[DigStep]) -> list[Point]:
                         print("Shouldn't be possible to go from UP to DOWN")
                     case Direction.Down:
                         pass
-                
+
                 current_node = Point(current_node.x, current_node.y + step.amount)
                 previous_direction = Direction.Down
 
@@ -290,5 +292,11 @@ def get_vertices(steps: list[DigStep]) -> list[Point]:
 
     return vertices
 
-print(f"{int(shoelace_area(get_vertices(dig_steps)))=}")
-print(f"{int(shoelace_area(get_vertices(new_dig_steps)))=}")
+def silver_solution(lines: list[str]) -> int:
+    dig_steps = parse_input(lines)
+    return int(shoelace_area(get_vertices(dig_steps)))
+
+def gold_solution(lines: list[str]) -> int:
+    dig_steps = parse_input(lines)
+    new_dig_steps = get_new_dig_steps(dig_steps)
+    return int(shoelace_area(get_vertices(new_dig_steps)))
