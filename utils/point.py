@@ -85,6 +85,10 @@ class Direction(Enum):
 
         raise RuntimeError(f"Unrecognized variable multiplied with Direction - {other}")
 
+    @staticmethod
+    def valid_directions() -> list["Direction"]:
+        return [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]
+
 def shoelace_area(vertices: list[Point]) -> float:
     n = len(vertices)
     area = 0.0
