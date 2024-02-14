@@ -56,3 +56,9 @@ def split_ranges(original_ranges: list[Range], critical_ranges: list[Range]) -> 
 def range_in_range(outer_range: Range, inner_range: Range) -> bool:
     # Whether inner range is in outer range
     return outer_range.start <= inner_range.start <= inner_range.end <= outer_range.end
+
+def get_number_amount(range_to_count: Range) -> int:
+    return range_to_count.end - range_to_count.start + 1
+
+def split_range(range_to_split: Range, number: int) -> tuple[Range, Range]:
+    return Range(range_to_split.start, number - 1), Range(number + 1, range_to_split.end)
