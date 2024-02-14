@@ -86,9 +86,9 @@ def check_accepted(data: Data, commands: dict[str, list[Condition]]) -> bool:
                 condition_passed = True
 
             if condition_passed:
-                if condition.destination == "A":
+                if condition.destination == ACCEPTED_DESTINATION:
                     return True
-                if condition.destination == "R":
+                if condition.destination == REJECTED_DESTINATION:
                     return False
                 current_conditions = commands[condition.destination]
                 break
@@ -96,9 +96,9 @@ def check_accepted(data: Data, commands: dict[str, list[Condition]]) -> bool:
     return False
 
 def count_distinct_accepted_combinations(destination: str, commands: dict[str, list[Condition]], ranges: DataRange) -> int:
-    if destination == "A":
+    if destination == ACCEPTED_DESTINATION:
         return ranges.x.get_number_count() * ranges.m.get_number_count() * ranges.a.get_number_count() * ranges.s.get_number_count()
-    if destination == "R":
+    if destination == REJECTED_DESTINATION:
         return 0
 
     result = 0
