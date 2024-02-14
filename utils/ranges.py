@@ -1,4 +1,10 @@
+from enum import Enum
 from typing import Optional
+
+class SplitMode(Enum):
+    INCLUDE_LEFT = 1
+    INCLUDE_RIGHT = 2
+    NOT_INCLUDE = 3
 
 class Range:
     def __init__(self, start: int, end: int):
@@ -65,5 +71,11 @@ class Range:
     def get_number_count(self) -> int:
         return self.end - self.start + 1
 
-    def split_range(self, number: int) -> tuple["Range", "Range"]:
-        return Range(self.start, number - 1), Range(number + 1, self.end)
+    def split_range(self, number: int, mode: SplitMode = SplitMode.NOT_INCLUDE) -> tuple["Range", "Range"]:
+        match mode:
+            case SplitMode.INCLUDE_LEFT:
+                return Range(self.start, number), Range(number + 1, self.end)
+            case SplitMode.INCLUDE_RIGHT:
+                return Range(self.start, number - 1), Range(number, self.end)
+            case SplitMode.NOT_INCLUDE:
+                return Range(self.start, number - 1), Range(number + 1, self.end)

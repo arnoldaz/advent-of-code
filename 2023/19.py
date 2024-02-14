@@ -1,6 +1,6 @@
-from typing import NamedTuple
-
-from utils.ranges import Range
+import re
+from typing import NamedTuple, Optional
+from utils.ranges import Range, SplitMode
 
 class Condition(NamedTuple):
     variable: str
@@ -17,29 +17,30 @@ class Data(NamedTuple):
     a: int
     s: int
 
-class DataRange:
-    def __init__(self, x: Range, m: Range, a: Range, s: Range):
-        self.x = x
-        self.m = m
-        self.a = a
-        self.s = s
+class DataRange(NamedTuple):
+    x: Range
+    m: Range
+    a: Range
+    s: Range
 
-    def copy(self) -> "DataRange":
-        return DataRange(self.x, self.m, self.a, self.s)
+    def copy(self, x: Optional[Range] = None, m: Optional[Range] = None, a: Optional[Range] = None, s: Optional[Range] = None) -> "DataRange":
+        return DataRange(x or self.x, m or self.m, a or self.a, s or self.s)
 
 def parse_input(lines: list[str]) -> tuple[list[Data], dict[str, list[Condition]]]:
     commands: dict[str, list[Condition]] = {}
-    data = []
+    data: list[Data] = []
+
+    data_format = r"^{x=(\d+),m=(\d+),a=(\d+),s=(\d+)}$"
 
     read_commands = True
     for line in lines:
-        if line == "":
+        if not line:
             read_commands = False
             continue
 
         if read_commands:
             name, command_data = line.split("{")
-            conditions = command_data.strip("}").split(",")
+            conditions = command_data.removesuffix("}").split(",")
             final_conditions: list[Condition] = []
             for condition in conditions:
                 if ":" in condition:
@@ -50,126 +51,110 @@ def parse_input(lines: list[str]) -> tuple[list[Data], dict[str, list[Condition]
                 final_conditions.append(final_condition)
             commands[name] = final_conditions
         else:
-            x, m, a, s = line.strip("{").strip("}").split(",")
-            data.append(Data(int(x.removeprefix("x=")), int(m.removeprefix("m=")), int(a.removeprefix("a=")), int(s.removeprefix("s="))))
+            match = re.match(data_format, line)
+            assert match, "Regex match should always find data"
+            data.append(Data(int(match.group(1)), int(match.group(2)), int(match.group(3)), int(match.group(4))))
 
     return data, commands
 
 def check_accepted(data: Data, commands: dict[str, list[Condition]]) -> bool:
     current_conditions = commands["in"]
 
-    final_result = False
     found = False
     while not found:
         for condition in current_conditions:
             condition_passed = False
+            variable = -1
+
             match condition.variable:
                 case "x":
-                    match condition.sign:
-                        case "<":
-                            condition_passed = data.x < condition.number
-                        case ">":
-                            condition_passed = data.x > condition.number
+                    variable = data.x
                 case "m":
-                    match condition.sign:
-                        case "<":
-                            condition_passed = data.m < condition.number
-                        case ">":
-                            condition_passed = data.m > condition.number
+                    variable = data.m
                 case "a":
-                    match condition.sign:
-                        case "<":
-                            condition_passed = data.a < condition.number
-                        case ">":
-                            condition_passed = data.a > condition.number
+                    variable = data.a
                 case "s":
-                    match condition.sign:
-                        case "<":
-                            condition_passed = data.s < condition.number
-                        case ">":
-                            condition_passed = data.s > condition.number
-                case "":
-                    condition_passed = True
+                    variable = data.s
+
+            match condition.sign:
+                case "<":
+                    condition_passed = variable < condition.number
+                case ">":
+                    condition_passed = variable > condition.number
+
+            if not condition.variable: # no condition
+                condition_passed = True
 
             if condition_passed:
                 if condition.destination == "A":
-                    final_result = True
-                    found = True
-                    break
-                elif condition.destination == "R":
-                    final_result = False
-                    found = True
-                    break
-                else:
-                    current_conditions = commands[condition.destination]
-                    break
+                    return True
+                if condition.destination == "R":
+                    return False
+                current_conditions = commands[condition.destination]
+                break
 
-    return final_result
+    return False
 
-def calculate_accepted_sum(data: list[Data], commands: dict[str, list[Condition]]) -> int:
-    result = 0
-
-    for entry in data:
-        if check_accepted(entry, commands):
-            result += entry.x + entry.m + entry.a + entry.s
-
-    return result
-
-
-# pylint: disable=unused-argument
-
-def silver_solution(lines: list[str]) -> int:
-    data, commands = parse_input(lines)
-    return calculate_accepted_sum(data, commands)
-
-def gold_solution(lines: list[str]) -> int:
-    _, commands = parse_input(lines)
-
-    ranges = DataRange(Range(1, 4000), Range(1, 4000), Range(1, 4000), Range(1, 4000))
-
-    return recursive_shit("in", commands, ranges)
-
-def recursive_shit(root: str, commands: dict[str, list[Condition]], ranges: DataRange) -> int:
-    if root == "A":
+def count_distinct_accepted_combinations(destination: str, commands: dict[str, list[Condition]], ranges: DataRange) -> int:
+    if destination == "A":
         return ranges.x.get_number_count() * ranges.m.get_number_count() * ranges.a.get_number_count() * ranges.s.get_number_count()
-    if root == "R":
+    if destination == "R":
         return 0
 
     result = 0
-    for line in commands[root]:
-        cloned_range = ranges.copy()
-        leftover_ranges = ranges.copy()
-        match line.variable:
+    for condition in commands[destination]:
+        match condition.variable:
             case "x":
-                if line.sign == "<":
-                    cloned_range.x = Range(ranges.x.start, line.number - 1)
-                    leftover_ranges.x = Range(line.number, ranges.x.end)
+                if condition.sign == "<":
+                    left, right = ranges.x.split_range(condition.number, SplitMode.INCLUDE_RIGHT)
+                    cloned_range = ranges.copy(x=left)
+                    leftover_ranges = ranges.copy(x=right)
                 else:
-                    cloned_range.x = Range(line.number + 1, ranges.x.end)
-                    leftover_ranges.x = Range(ranges.x.start, line.number)
+                    left, right = ranges.x.split_range(condition.number, SplitMode.INCLUDE_LEFT)
+                    cloned_range = ranges.copy(x=right)
+                    leftover_ranges = ranges.copy(x=left)
             case "m":
-                if line.sign == "<":
-                    cloned_range.m = Range(ranges.m.start, line.number - 1)
-                    leftover_ranges.m = Range(line.number, ranges.m.end)
+                if condition.sign == "<":
+                    left, right = ranges.m.split_range(condition.number, SplitMode.INCLUDE_RIGHT)
+                    cloned_range = ranges.copy(m=left)
+                    leftover_ranges = ranges.copy(m=right)
                 else:
-                    cloned_range.m = Range(line.number + 1, ranges.m.end)
-                    leftover_ranges.m = Range(ranges.m.start, line.number)
+                    left, right = ranges.m.split_range(condition.number, SplitMode.INCLUDE_LEFT)
+                    cloned_range = ranges.copy(m=right)
+                    leftover_ranges = ranges.copy(m=left)
             case "a":
-                if line.sign == "<":
-                    cloned_range.a = Range(ranges.a.start, line.number - 1)
-                    leftover_ranges.a = Range(line.number, ranges.a.end)
+                if condition.sign == "<":
+                    left, right = ranges.a.split_range(condition.number, SplitMode.INCLUDE_RIGHT)
+                    cloned_range = ranges.copy(a=left)
+                    leftover_ranges = ranges.copy(a=right)
                 else:
-                    cloned_range.a = Range(line.number + 1, ranges.a.end)
-                    leftover_ranges.a = Range(ranges.a.start, line.number)
+                    left, right = ranges.a.split_range(condition.number, SplitMode.INCLUDE_LEFT)
+                    cloned_range = ranges.copy(a=right)
+                    leftover_ranges = ranges.copy(a=left)
             case "s":
-                if line.sign == "<":
-                    cloned_range.s = Range(ranges.s.start, line.number - 1)
-                    leftover_ranges.s = Range(line.number, ranges.s.end)
+                if condition.sign == "<":
+                    left, right = ranges.s.split_range(condition.number, SplitMode.INCLUDE_RIGHT)
+                    cloned_range = ranges.copy(s=left)
+                    leftover_ranges = ranges.copy(s=right)
                 else:
-                    cloned_range.s = Range(line.number + 1, ranges.s.end)
-                    leftover_ranges.s = Range(ranges.s.start, line.number)
+                    left, right = ranges.s.split_range(condition.number, SplitMode.INCLUDE_LEFT)
+                    cloned_range = ranges.copy(s=right)
+                    leftover_ranges = ranges.copy(s=left)
+            case _:
+                cloned_range = ranges.copy()
+                leftover_ranges = ranges.copy()
 
-        result += recursive_shit(line.destination, commands, cloned_range)
+        result += count_distinct_accepted_combinations(condition.destination, commands, cloned_range)
         ranges = leftover_ranges.copy()
 
     return result
+
+def silver_solution(lines: list[str]) -> int:
+    data, commands = parse_input(lines)
+    return sum(entry.x + entry.m + entry.a + entry.s for entry in data if check_accepted(entry, commands))
+
+def gold_solution(lines: list[str]) -> int:
+    _, commands = parse_input(lines)
+    initial_ranges = DataRange(Range(1, 4000), Range(1, 4000), Range(1, 4000), Range(1, 4000))
+
+    return count_distinct_accepted_combinations("in", commands, initial_ranges)
