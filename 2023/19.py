@@ -1,7 +1,6 @@
-import math
 from typing import NamedTuple
 
-from utils.ranges import Range, find_overlap, get_number_amount, remove_overlapping_range, split_range
+from utils.ranges import Range
 
 class Condition(NamedTuple):
     variable: str
@@ -132,7 +131,7 @@ def gold_solution(lines: list[str]) -> int:
 
 def recursive_shit(root: str, commands: dict[str, list[Condition]], ranges: DataRange) -> int:
     if root == "A":
-        return get_number_amount(ranges.x) * get_number_amount(ranges.m) * get_number_amount(ranges.a) * get_number_amount(ranges.s)
+        return ranges.x.get_number_count() * ranges.m.get_number_count() * ranges.a.get_number_count() * ranges.s.get_number_count()
     if root == "R":
         return 0
 

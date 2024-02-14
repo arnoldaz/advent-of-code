@@ -1,5 +1,5 @@
 from typing import NamedTuple
-from utils.ranges import Range, find_overlap, range_in_range
+from utils.ranges import Range
 
 class AssignmentPair(NamedTuple):
     left: Range
@@ -16,7 +16,7 @@ def parse_input(lines: list[str]) -> list[AssignmentPair]:
     return assignment_pairs
 
 def silver_solution(lines: list[str]) -> int:
-    return sum(1 for pair in parse_input(lines) if range_in_range(pair.left, pair.right) or range_in_range(pair.right, pair.left))
+    return sum(1 for pair in parse_input(lines) if pair.left.is_range_inside(pair.right) or pair.right.is_range_inside(pair.left))
 
 def gold_solution(lines: list[str]) -> int:
-    return sum(1 for pair in parse_input(lines) if find_overlap(pair.left, pair.right))
+    return sum(1 for pair in parse_input(lines) if pair.left.find_overlap(pair.right))

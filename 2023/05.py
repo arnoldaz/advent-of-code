@@ -1,5 +1,5 @@
 from typing import NamedTuple
-from utils.ranges import Range, range_in_range, split_ranges
+from utils.ranges import Range
 
 class SeedMap(NamedTuple):
     destination_start: int
@@ -53,12 +53,12 @@ def perform_range_mapping(seed_ranges: list[Range], seed_maps: list[SeedMap]) ->
     mapping_start_ranges = [Range(x.source_start, x.source_start + x.range - 1) for x in seed_maps]
     mapping_destination_ranges = [Range(x.destination_start, x.destination_start + x.range - 1) for x in seed_maps]
 
-    split_seed_ranges = split_ranges(seed_ranges, mapping_start_ranges)
+    split_seed_ranges = Range.split_ranges(seed_ranges, mapping_start_ranges)
     mapped_seed_ranges: list[Range] = []
 
     for seed_range in split_seed_ranges:
         for i, mapping_range in enumerate(mapping_start_ranges):
-            if not range_in_range(mapping_range, seed_range):
+            if not mapping_range.is_range_inside(seed_range):
                 continue
 
             mapping_destination_range = mapping_destination_ranges[i]
