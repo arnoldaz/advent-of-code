@@ -232,12 +232,15 @@ def navigate_path(valves: dict[str, ValveData]):
 
     max_value = 0
 
+    counter = 0
+
     while True:
         print("before", len(valve_paths))
         valve_paths, finished_valve_paths = partition(lambda x: x.timer <= ValvePath.MAX_TIMER, valve_paths)
         print("after", len(valve_paths))
 
         if len(finished_valve_paths) > 0:
+            counter += len(finished_valve_paths)
             max_value = max(max(x.total_pressure for x in finished_valve_paths), max_value)
 
         if len(valve_paths) == 0:
@@ -263,6 +266,8 @@ def navigate_path(valves: dict[str, ValveData]):
     # valve_paths.sort(key=lambda x: x.total_pressure, reverse=True)
     # for path in valve_paths[:]:
     #     print(path.position, path.open_valves, path.total_pressure, path.timer)
+
+    print("counter", counter)
 
     return max_value
 
