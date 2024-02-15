@@ -8,6 +8,7 @@ disable=
     unsubscriptable-object, # disabled due to bugged detection for template parameters
     too-many-branches,
     too-many-locals,
+    too-many-arguments,
 
 [BASIC]
 
