@@ -1,4 +1,12 @@
+# Downloaded and cached input files
 input/
+
+# Temporary helper files
 temp/
+
+# Environment file with private cookies and tokens
 .env
+
+# Compiled python files
+__pycache__/
 *.pyc
