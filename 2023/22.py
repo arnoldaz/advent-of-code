@@ -100,12 +100,12 @@ def count_not_disintegratable_brick_sum(all_bricks: list[Brick]) -> int:
 
     return counter
 
-def silver_solution(lines: list[str]) -> int:
+def silver_solution(lines: list[str]) -> int: # runs for ~600s
     bricks = parse_input(lines)
     all_new_bricks, _ = fall_bricks(bricks)
     return count_disintegratable_bricks(all_new_bricks)
 
-def gold_solution(lines: list[str]) -> int:
+def gold_solution(lines: list[str]) -> int: # runs for ~2800s
     bricks = parse_input(lines)
     all_new_bricks, _ = fall_bricks(bricks)
     return count_not_disintegratable_brick_sum(all_new_bricks)

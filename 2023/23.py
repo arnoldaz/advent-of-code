@@ -1,81 +1,9 @@
-from enum import Enum
-from typing import Optional
 import uuid
 import sys
+from utils.matrix import Matrix
+from utils.point import Direction, Point
 
 sys.setrecursionlimit(2 ** 30)
-
-FILE_NAME = "input-test.txt"
-with open(FILE_NAME) as file:
-    lines = [line.rstrip() for line in file]
-
-class Point:
-    x: int
-    y: int
-    z: int
-
-    def __init__(self, x: int = 0, y: int = 0, z: int = 0):
-        self.x = x
-        self.y = y
-        self.z = z
-
-    def __str__(self):
-        return f"{{Point: x={self.x}, y={self.y}, z={self.z}}}"
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __hash__(self):
-        return hash((self.x, self.y, self.z))
-
-    def __add__(self, other):
-        if isinstance(other, Point):
-            return Point(self.x + other.x, self.y + other.y, self.z + other.z)
-        
-        if isinstance(other, int):
-            return Point(self.x + other, self.y + other, self.z + other)
-        
-        raise Exception(f"Unrecognized variable added to Point - {other}")
-
-    def __eq__(self, other):
-        if isinstance(other, Point):
-            return self.x == other.x and self.y == other.y and self.z == other.z
-        
-        if other == None:
-            return False
-
-        raise Exception(f"Unrecognized variable compared to Point - {other}")
-
-class Direction(Enum):
-    Default = Point(0, 0)
-    Up = Point(0, -1)
-    Right = Point(1, 0)
-    Down = Point(0, 1)
-    Left = Point(-1, 0)
-class Matrix:
-    _data: list[list[str]]
-
-    def __init__(self, data: list[str]):
-        assert len(data) > 0 and len(data[0]) > 0
-        self._data = [list(string) for string in data]
-
-    def height(self) -> int:
-        return len(self._data)
-
-    def width(self) -> int:
-        return len(self._data[0])
-
-    def get_data(self) -> list[list[str]]:
-        return self._data
-
-    def get_symbol(self, position: Point) -> Optional[str]:
-        return self._data[position.y][position.x] if self.in_bounds(position) else None
-
-    def in_bounds(self, position: Point) -> bool:
-        return 0 <= position.x < self.width() and 0 <= position.y < self.height()
-
-    def get_neighbors(self, position: Point) -> list[tuple[Point, Direction]]:
-        return [(position + direction.value, direction) for direction in Direction if direction != Direction.Default and self.in_bounds(position + direction.value)]
 
 class Path:
     id: uuid.UUID
@@ -102,7 +30,7 @@ class Path:
 
     def get_path_length(self) -> int:
         return len(self.steps)
-    
+
     def copy(self):
         new_path = Path(self.current_position)
         new_path.steps = self.steps.copy()
@@ -110,12 +38,8 @@ class Path:
 
         return new_path
 
-def remove_list_indexes(list: list, indexes_to_remove: list[int]):
-    for item in sorted(indexes_to_remove, reverse=True): 
-        del list[item]
-
 def get_initial_data(lines: list[str]) -> tuple[Matrix, Point, Point]:
-    matrix = Matrix(lines)
+    matrix = Matrix[str](lines, str)
     matrix_data = matrix.get_data()
 
     first_line = matrix_data[0]
@@ -136,27 +60,6 @@ def get_initial_data(lines: list[str]) -> tuple[Matrix, Point, Point]:
 
     return (matrix, start_position, end_position)
 
-def output_path(path_file_name: str, path: Path, matrix: Matrix):
-    with open(path_file_name, "w") as file:
-        for y in range(matrix.height()):
-            write_line = []
-            for x in range(matrix.width()):
-                if Point(x, y) in path.steps:
-                    write_line.append("@")
-                else:
-                    write_line.append(matrix.get_symbol(Point(x, y)))
-            file.write("".join(write_line) + "\n")
-
-def output_dot_file(graph: dict[Point, dict[Point, int]]):
-    with open(f"{FILE_NAME.removesuffix(".txt")}.dot", "w") as file:
-        file.write("graph conections {\n")
-        file.write("    graph [overlap=false];\n")
-        for key in graph:
-            values = graph[key]
-            for value_key in values:
-                file.write(f"    x{key.x}y{key.y} -- x{value_key.x}y{value_key.y} [label=\"{values[value_key]}\"];\n")
-        file.write("}\n")
-
 def get_possible_movements(path: Path, matrix: Matrix, ignore_directions: bool) -> list[Point]:
     neighbors = matrix.get_neighbors(path.current_position)
     possible_movements: list[Point] = []
@@ -164,23 +67,23 @@ def get_possible_movements(path: Path, matrix: Matrix, ignore_directions: bool) 
     for neighbor in neighbors:
         neighbor_position, neighbor_direction = neighbor
         symbol = matrix.get_symbol(neighbor_position)
-        
+
         if symbol == "#":
             continue
         if not ignore_directions:
-            if symbol == "<" and neighbor_direction != Direction.Left:
+            if symbol == "<" and neighbor_direction != Direction.LEFT:
                 continue
-            if symbol == ">" and neighbor_direction != Direction.Right:
+            if symbol == ">" and neighbor_direction != Direction.RIGHT:
                 continue
-            if symbol == "v" and neighbor_direction != Direction.Down:
+            if symbol == "v" and neighbor_direction != Direction.DOWN:
                 continue
-            if symbol == "^" and neighbor_direction != Direction.Up:
+            if symbol == "^" and neighbor_direction != Direction.UP:
                 continue
         if neighbor_position in path.steps:
             continue
 
         possible_movements.append(neighbor_position)
-    
+
     return possible_movements
 
 def walk_until_intersection(path: Path, matrix: Matrix, start_position: Point, end_position: Point, ignore_directions: bool) -> tuple[list[Point], bool]:
@@ -189,7 +92,7 @@ def walk_until_intersection(path: Path, matrix: Matrix, start_position: Point, e
 
         if len(possible_movements) == 1:
             path.take_step(possible_movements[0])
-            
+
             if path.current_position == end_position or path.current_position == start_position:
                 return [], True
         else:
@@ -197,7 +100,7 @@ def walk_until_intersection(path: Path, matrix: Matrix, start_position: Point, e
 
 def create_graph(matrix: Matrix, start_position: Point, end_position: Point, ignore_directions: bool) -> dict[Point, dict[Point, int]]:
     graph: dict[Point, dict[Point, int]] = {}
-    
+
     intersections: list[Point] = [start_position]
     for y, line in enumerate(matrix.get_data()):
         for x, _ in enumerate(line):
@@ -239,7 +142,7 @@ def find_all_paths(graph: dict[Point, dict[Point, int]], start: Point, end: Poin
     path = path + [start]
     if start == end:
         return [path]
-    
+
     if start not in graph or start in visited:
         return []
 
@@ -267,7 +170,12 @@ def get_max_path_weight(graph: dict[Point, dict[Point, int]], start: Point, end:
 
     return max_path_sum
 
-_matrix, _start_position, _end_position = get_initial_data(lines)
-_graph_dict = create_graph(_matrix, _start_position, _end_position, True)
-_max_path_sum = get_max_path_weight(_graph_dict, _start_position, _end_position)
-print(f"{_max_path_sum=}")
+def silver_solution(lines: list[str]) -> int:
+    matrix, start_position, end_position = get_initial_data(lines)
+    graph_dict = create_graph(matrix, start_position, end_position, False)
+    return get_max_path_weight(graph_dict, start_position, end_position)
+
+def gold_solution(lines: list[str]) -> int: # runs for ~345s
+    matrix, start_position, end_position = get_initial_data(lines)
+    graph_dict = create_graph(matrix, start_position, end_position, True)
+    return get_max_path_weight(graph_dict, start_position, end_position)
