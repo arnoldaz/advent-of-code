@@ -5,6 +5,7 @@ import time
 from types import ModuleType
 from typing import Callable, NamedTuple
 from dotenv import load_dotenv
+from colorama import Fore
 from utils.aoc import copy_template_file, get_solution_module_path, read_input_file, read_test_input
 
 class ProgramArguments(NamedTuple):
@@ -58,6 +59,18 @@ def timed_solution(function: Callable[[list[str]], int | str], function_params: 
 
     return result, end_time - start_time
 
+def format_nanoseconds_string(nanoseconds: int) -> str:
+    seconds = nanoseconds / 1e9
+
+    if seconds < 1:
+        color = Fore.GREEN
+    elif seconds < 10:
+        color = Fore.YELLOW
+    else:
+        color = Fore.RED
+
+    return f"{color}{seconds:>0.9f}s{Fore.RESET}"
+
 def load_module(year: int, day: int) -> ModuleType:
     module_path = get_solution_module_path(year, day)
     spec = importlib.util.spec_from_file_location(str(day), module_path)
@@ -84,15 +97,19 @@ def run_solution(year: int, day: int, run_silver: bool, run_gold: bool, test_inp
 
     if run_silver:
         result, time_taken = timed_solution(module.silver_solution, input_data)
-        print(f"Silver solution: {result:>20} | time {time_taken / 1e9}s")
+        print(f"Silver solution: {result:>20} | time {format_nanoseconds_string(time_taken)}")
 
     if run_gold:
         result, time_taken = timed_solution(module.gold_solution, input_data)
-        print(f"Gold solution:   {result:>20} | time {time_taken / 1e9}s")
+        print(f"Gold solution:   {result:>20} | time {format_nanoseconds_string(time_taken)}")
 
 def run_all_solutions(year: int, day_range: tuple[int, int]):
     total_silver_time, total_gold_time = 0, 0
     first_day, last_day = day_range
+    split_line = f"{"-" * 43}+{"-" * 27}"
+
+    print(split_line)
+
     for day in range(first_day, last_day + 1):
         module = load_module(year, day)
         input_data = read_input_file(year, day)
@@ -102,10 +119,11 @@ def run_all_solutions(year: int, day_range: tuple[int, int]):
         total_silver_time += silver_time_taken
         total_gold_time += gold_time_taken
 
-        print(f"[Day {day:0>2} time] Silver: {(silver_time_taken / 1e9):>12} | Gold: {(gold_time_taken / 1e9):>12}")
+        print(f"[Day {day:0>2} time] Silver: {(format_nanoseconds_string(silver_time_taken)):>30} | Gold: {(format_nanoseconds_string(gold_time_taken)):>30}")
 
-    print(f"{"-" * 35}+{"-" * 19}")
-    print(f"[Total times] Silver: {(total_silver_time / 1e9):>12} | Gold: {(total_gold_time / 1e9):>12}")
+    print(split_line)
+    print(f"[Total times] Silver: {(format_nanoseconds_string(total_silver_time)):>30} | Gold: {(format_nanoseconds_string(total_gold_time)):>30}")
+    print(split_line)
 
 def main():
     args = parse_arguments()
