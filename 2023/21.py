@@ -21,33 +21,40 @@ def parse_input(lines: list[str], create_5x5: bool) -> tuple[Matrix[str], Point]
 
     return grid, starting_position
 
-def calculate_possible_positions(starting_position: Point, grid: Matrix[str], max_iterations: int):
+def calculate_possible_positions(starting_position: Point, grid: Matrix[str], iteration_thresholds: list[int]) -> list[int]:
     current_positions: list[Point] = [starting_position]
+    directions = Direction.valid_directions()
 
-    iterations = 0
-    while iterations < max_iterations:
-        iterations += 1
+    lengths_at_thresholds: list[int] = []
+    threshold_index = 0
 
-        new_positions = []
+    iteration = 0
+    while iteration < iteration_thresholds[threshold_index]:
+        iteration += 1
+
+        new_positions = set[Point]()
         for current_position in current_positions:
-            for position in [current_position + direction for direction in Direction.valid_directions()]:
-                if grid.in_bounds(position) and grid.get_symbol(position) != "#":
-                    new_positions.append(position)
+            for position in [current_position + direction for direction in directions]:
+                if grid.get_symbol(position) != "#":
+                    new_positions.add(position)
 
-        current_positions = list(set(new_positions))
+        current_positions = list(new_positions)
 
-    return len(current_positions)
+        if iteration in iteration_thresholds:
+            lengths_at_thresholds.append(len(current_positions))
+            threshold_index = min(threshold_index + 1, len(iteration_thresholds) - 1)
+
+    return lengths_at_thresholds
 
 def silver_solution(lines: list[str]) -> int:
     grid, starting_position = parse_input(lines, False)
-    return calculate_possible_positions(starting_position, grid, 64)
+    return calculate_possible_positions(starting_position, grid, [64])[0]
 
 def gold_solution(lines: list[str]) -> int:
     grid, starting_position = parse_input(lines, True)
 
-    x0, y0 = 65, calculate_possible_positions(starting_position, grid, 65)
-    x1, y1 = 65 + 131, calculate_possible_positions(starting_position, grid, 65 + 131)
-    x2, y2 = 65 + 2 * 131, calculate_possible_positions(starting_position, grid, 65 + 2 * 131)
+    x0, x1, x2 = 65, 65 + 131, 65 + 2 * 131
+    y0, y1, y2, *_ = calculate_possible_positions(starting_position, grid, [x0, x1, x2])
 
     y01 = (y1 - y0) / (x1 - x0)
     y12 = (y2 - y1) / (x2 - x1)
