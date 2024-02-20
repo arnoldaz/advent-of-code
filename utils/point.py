@@ -70,7 +70,20 @@ class Point:
     def abs(self) -> "Point":
         return Point(abs(self.x), abs(self.y), abs(self.z))
 
+    def get_neighbors_3d(self) -> list["Point"]:
+        return [self + point for point in DIRECTIONS_3D]
+
+
 INVALID_POINT = Point(-1, -1, -1)
+
+DIRECTIONS_3D = [
+    Point(1, 0, 0),
+    Point(-1, 0, 0),
+    Point(0, 1, 0),
+    Point(0, -1, 0),
+    Point(0, 0, 1),
+    Point(0, 0, -1),
+]
 
 class Direction(Enum):
     NONE = Point(0, 0)
