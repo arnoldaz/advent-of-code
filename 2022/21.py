@@ -1,7 +1,3 @@
-# pylint: disable=unused-argument
-
-
-
 def parse_input(lines: list[str]) -> dict[str, int | tuple[str, str, str]]:
     monkeys: dict[str, int | tuple[str, str, str]] = {}
     for line in lines:
@@ -34,7 +30,12 @@ def get_monkey_number(monkeys: dict[str, int | tuple[str, str, str]], monkey_nam
         case _:
             raise ValueError(f"Unknown operator '{operator}'")
 
-def get_monkey_path(monkeys: dict[str, int | tuple[str, str, str]], start_monkey: str, end_monkey: str, path: list[str]) -> bool:
+def get_monkey_path(monkeys: dict[str, int | tuple[str, str, str]], start_monkey: str, end_monkey: str) -> list[str]:
+    path: list[str] = []
+    get_monkey_path_recursive(monkeys, start_monkey, end_monkey, path)
+    return path
+
+def get_monkey_path_recursive(monkeys: dict[str, int | tuple[str, str, str]], start_monkey: str, end_monkey: str, path: list[str]) -> bool:
     path.append(start_monkey)
 
     if start_monkey == end_monkey:
@@ -47,51 +48,50 @@ def get_monkey_path(monkeys: dict[str, int | tuple[str, str, str]], start_monkey
 
     first_name, _, second_name = output
 
-    if get_monkey_path(monkeys, first_name, end_monkey, path):
+    if get_monkey_path_recursive(monkeys, first_name, end_monkey, path):
         return True
 
-    if get_monkey_path(monkeys, second_name, end_monkey, path):
+    if get_monkey_path_recursive(monkeys, second_name, end_monkey, path):
         return True
 
     path.pop()
     return False
 
-def find_equality_test_value(monkeys: dict[str, int | tuple[str, str, str]], start_monkey: str, test_monkey: str, path: list[str]):
+def find_equality_test_value(monkeys: dict[str, int | tuple[str, str, str]], start_monkey: str, path: list[str]):
     output = monkeys[start_monkey]
     assert not isinstance(output, int)
 
     first_name, _, second_name = output
-    end_branch = path[1] # "pppw"
-    non_end_branch = second_name if first_name == end_branch else first_name # "sjwn"
-    non_end_value_previous = get_monkey_number(monkeys, non_end_branch) # 150
+    end_branch = path[1]
+    non_end_branch = second_name if first_name == end_branch else first_name
+    non_end_value_previous = get_monkey_number(monkeys, non_end_branch)
 
     for segment in path[2:]:
-        output = monkeys[end_branch] # cczh / lfqf
+        output = monkeys[end_branch]
         assert not isinstance(output, int)
+
         first_name, operator, second_name = output
-        end_branch = segment # cczh
-        non_end_branch, is_unknown_first = (second_name, True) if first_name == end_branch else (first_name, False) # lfqf
+        end_branch = segment
+        non_end_branch, is_unknown_first = (second_name, True) if first_name == end_branch else (first_name, False)
         non_end_value = get_monkey_number(monkeys, non_end_branch) # 4
 
-        print(f"{end_branch=} {non_end_branch=} {non_end_value=} {non_end_value_previous=} {operator=} {is_unknown_first=} ", end="")
         match operator:
             case "+":
                 non_end_value_previous -= non_end_value
             case "-":
-                if is_unknown_first: # x - 3 = 5
+                if is_unknown_first:
                     non_end_value_previous = non_end_value_previous + non_end_value
-                else: # 3 - x = 5
+                else:
                     non_end_value_previous = non_end_value - non_end_value_previous
             case "*":
-                non_end_value_previous /= non_end_value
+                non_end_value_previous //= non_end_value
             case "/":
                 if is_unknown_first:
-                    non_end_value_previous = non_end_value_previous * non_end_value # 600
+                    non_end_value_previous = non_end_value_previous * non_end_value
                 else:
-                    non_end_value_previous = non_end_value / non_end_value_previous
+                    non_end_value_previous = non_end_value // non_end_value_previous
             case _:
                 raise ValueError(f"Unknown operator '{operator}'")
-        print(f"after {non_end_value_previous=}")
 
     return non_end_value_previous
 
@@ -99,11 +99,7 @@ def silver_solution(lines: list[str]) -> int:
     monkeys = parse_input(lines)
     return get_monkey_number(monkeys, "root")
 
-def gold_solution(lines: list[str]):
+def gold_solution(lines: list[str]) -> int:
     monkeys = parse_input(lines)
-
-    path = []
-    get_monkey_path(monkeys, "root", "humn", path)
-    # print(path)
-
-    return find_equality_test_value(monkeys, "root", "humn", path)
+    path = get_monkey_path(monkeys, "root", "humn")
+    return find_equality_test_value(monkeys, "root", path)
