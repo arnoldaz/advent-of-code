@@ -73,6 +73,54 @@ class Point:
     def get_neighbors_3d(self) -> list["Point"]:
         return [self + point for point in DIRECTIONS_3D]
 
+    def between_points_orthogonal(self, point1: "Point", point2: "Point") -> bool:
+        if point1.x == point2.x: # vertical
+            return self.x == point1.x and (point1.y <= self.y <= point2.y or point1.y >= self.y >= point2.y)
+        if point1.y == point2.y: # horizontal
+            return self.y == point1.y and (point1.x <= self.x <= point2.x or point1.x >= self.x >= point2.x)
+
+        raise RuntimeError(f"Points {point1} and {point2} are diagonal")
+
+    def distance_orthogonal(self, point: "Point") -> int:
+        if self.x == point.x: # vertical
+            return abs(self.y - point.y)
+        if self.y == point.y: # horizontal
+            return abs(self.x - point.x)
+
+        raise RuntimeError(f"Points {self} and {point} are diagonal")
+
+    def point_from_distance(self, end: "Point", distance: int) -> "Point":
+        if self.x == end.x: # vertical
+            y_value = self.y + distance if self.y < end.y else self.y - distance
+            return Point(self.x, y_value)
+        if self.y == end.y: # horizontal
+            x_value = self.x + distance if self.x < end.x else self.x - distance
+            return Point(x_value, self.y)
+
+        raise RuntimeError(f"Points {self} and {end} are diagonal")
+
+    # def between_points_ratio(self, start: "Point", end: "Point") -> float:
+    #     if start.x == end.x: # vertical
+    #         total_length = end.y - start.y
+    #         length_to_point = self.y - start.y
+    #         return length_to_point / total_length
+    #     if start.y == end.y: # horizontal
+    #         total_length = end.x - start.x
+    #         length_to_point = self.x - start.x
+    #         return length_to_point / total_length
+
+    #     raise RuntimeError(f"Points {start} and {end} are diagonal")
+
+    # @staticmethod
+    # def between_points_point(start: "Point", end: "Point", ratio: float) -> "Point":
+    #     if start.x == end.x: # vertical
+    #         y_value = round(start.y + (ratio * (end.y - start.y)))
+    #         return Point(start.x, y_value)
+    #     if start.y == end.y: # horizontal
+    #         x_value = round(start.x + (ratio * (end.x - start.x)))
+    #         return Point(start.x, x_value)
+
+    #     raise RuntimeError(f"Points {start} and {end} are diagonal")
 
 INVALID_POINT = Point(-1, -1, -1)
 
@@ -91,6 +139,12 @@ class Direction(Enum):
     RIGHT = Point(1, 0)
     DOWN = Point(0, 1)
     LEFT = Point(-1, 0)
+
+    def __str__(self) -> str:
+        return f"{{{self.name}}}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
 
     def __mul__(self, other):
         if isinstance(other, int):
