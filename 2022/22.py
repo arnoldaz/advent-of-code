@@ -31,14 +31,14 @@ CUBE_MAP: dict[tuple[Point, Point, Direction], tuple[Point, Point, Direction]] =
     (Point(50, 50 - 1), Point(50, 0), Direction.LEFT): (Point(0, 50 * 2), Point(0, 50 * 3 - 1), Direction.RIGHT), # 1 to 5
 }
 
-def get_cube_map(position: Point, direction: Direction) -> tuple[Point, Direction]:
+def get_cube_map_movement(position: Point, direction: Direction) -> tuple[Point, Direction]:
     for (start, end, required_direction), (destination_start, destination_end, destination_direction) in CUBE_MAP.items():
         if position.between_points_orthogonal(start, end) and direction == required_direction:
             distance = position.distance_orthogonal(start)
             new_point = destination_start.point_from_distance(destination_end, distance)
             return new_point, destination_direction
 
-    raise ValueError(f"wtf {position=} {direction=}")
+    raise ValueError(f"{position=} with {direction=} not in the cube map")
 
 def parse_input(lines: list[str]) -> tuple[Matrix[str], Point, list[str | int]]:
     matrix_lines = lines[:-2]
@@ -66,7 +66,7 @@ def move_step(matrix: Matrix[str], current_position: Point, direction: Direction
             return current_position, direction
         case " ":
             if is_cube:
-                new_position, new_direction = get_cube_map(current_position, direction)
+                new_position, new_direction = get_cube_map_movement(current_position, direction)
                 return (new_position, new_direction) if matrix.get_symbol(new_position) == "." else (current_position, direction)
 
             match direction:
