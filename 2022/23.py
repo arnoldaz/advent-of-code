@@ -1,10 +1,12 @@
 import sys
+from typing import Optional
 from utils.point import INVALID_POINT, Direction, Point
 
 NORTH_MOVEMENT_CHECK = [Direction.UP.value + Direction.LEFT.value, Direction.UP.value, Direction.UP.value + Direction.RIGHT.value]
 SOUTH_MOVEMENT_CHECK = [Direction.DOWN.value + Direction.LEFT.value, Direction.DOWN.value, Direction.DOWN.value + Direction.RIGHT.value]
 WEST_MOVEMENT_CHECK = [Direction.LEFT.value + Direction.UP.value, Direction.LEFT.value, Direction.LEFT.value + Direction.DOWN.value]
 EAST_MOVEMENT_CHECK = [Direction.RIGHT.value + Direction.UP.value, Direction.RIGHT.value, Direction.RIGHT.value + Direction.DOWN.value]
+VALID_DIRECTIONS = set(NORTH_MOVEMENT_CHECK + SOUTH_MOVEMENT_CHECK + WEST_MOVEMENT_CHECK + EAST_MOVEMENT_CHECK)
 
 def parse_input(lines: list[str]) -> set[Point]:
     positions = set[Point]()
@@ -14,17 +16,6 @@ def parse_input(lines: list[str]) -> set[Point]:
                 positions.add(Point(x, y))
 
     return positions
-
-VALID_DIRECTIONS = [
-    Direction.UP.value + Direction.LEFT.value,
-    Direction.UP.value,
-    Direction.UP.value + Direction.RIGHT.value,
-    Direction.RIGHT.value,
-    Direction.RIGHT.value + Direction.DOWN.value,
-    Direction.DOWN.value,
-    Direction.DOWN.value + Direction.LEFT.value,
-    Direction.LEFT.value,
-]
 
 def calculate_points(positions: set[Point]) -> int:
     min_x, max_x, min_y, max_y = sys.maxsize, -sys.maxsize, sys.maxsize, -sys.maxsize
@@ -42,9 +33,7 @@ def calculate_points(positions: set[Point]) -> int:
 
     return score
 
-def silver_solution(lines: list[str]) -> int:
-    positions = parse_input(lines)
-
+def perform_movement(positions: set[Point], round_count: Optional[int] = None) -> tuple[set[Point], int]:
     considerations: dict[Point, list[Point]] = { INVALID_POINT: [] }
     movement_order: list[tuple[list[Point], Direction]] = [
         (NORTH_MOVEMENT_CHECK, Direction.UP),
@@ -56,16 +45,13 @@ def silver_solution(lines: list[str]) -> int:
     i = 0
     while considerations:
         i += 1
-        # print(movement_order)
         considerations = {}
         for position in positions:
             if not any((position + direction) in positions for direction in VALID_DIRECTIONS):
-                # print("position", position)
                 continue
 
             for movement_check, movement_direction in movement_order:
                 if not any((position + direction) in positions for direction in movement_check):
-                    # print("nigga", movement_direction, position)
                     movement_new_position = position + movement_direction
                     if movement_new_position in considerations:
                         considerations[movement_new_position].append(position)
@@ -81,128 +67,19 @@ def silver_solution(lines: list[str]) -> int:
             positions.remove(start)
             positions.add(destination)
 
-        # print("cons", considerations)
-
-        # move to end
         movement_order.append(movement_order.pop(0))
 
-        if i == 10:
+        if round_count is not None and i == round_count:
             break
 
-        # for y in range(-10, 20):
-        #     for x in range(-10, 20):
-        #         if Point(x, y) in positions:
-        #             print("#", end="")
-        #         else:
-        #             print(".", end="")
-        #     print()
-        # print("===========", i)
-    # for x in considerations:
-    #     print(x, considerations[x])
+    return positions, i
 
-    # for y in range(-10, 20):
-    #     for x in range(-10, 20):
-    #         if Point(x, y) in positions:
-    #             print("#", end="")
-    #         else:
-    #             print(".", end="")
-    #     print()
-    # print("===========", i)
-
-    return calculate_points(positions)
-
-def gold_solution(lines: list[str]) -> int:
+def silver_solution(lines: list[str]) -> int:
     positions = parse_input(lines)
+    final_positions, _ = perform_movement(positions, 10)
+    return calculate_points(final_positions)
 
-    considerations: dict[Point, list[Point]] = { INVALID_POINT: [] }
-    movement_order: list[tuple[list[Point], Direction]] = [
-        (NORTH_MOVEMENT_CHECK, Direction.UP),
-        (SOUTH_MOVEMENT_CHECK, Direction.DOWN),
-        (WEST_MOVEMENT_CHECK, Direction.LEFT),
-        (EAST_MOVEMENT_CHECK, Direction.RIGHT),
-    ]
-
-    i = 0
-    while considerations:
-        i += 1
-        # print(movement_order)
-        considerations = {}
-        for position in positions:
-            if not any((position + direction) in positions for direction in VALID_DIRECTIONS):
-                # print("position", position)
-                continue
-
-            for movement_check, movement_direction in movement_order:
-                if not any((position + direction) in positions for direction in movement_check):
-                    # print("nigga", movement_direction, position)
-                    movement_new_position = position + movement_direction
-                    if movement_new_position in considerations:
-                        considerations[movement_new_position].append(position)
-                    else:
-                        considerations[movement_new_position] = [position]
-                    break
-
-        for destination, starts in considerations.items():
-            if len(starts) != 1:
-                continue
-
-            start = starts[0]
-            positions.remove(start)
-            positions.add(destination)
-
-        # print("cons", considerations)
-
-        # move to end
-        movement_order.append(movement_order.pop(0))
-
-        # if i == 10:
-        #     break
-
-        # for y in range(-10, 20):
-        #     for x in range(-10, 20):
-        #         if Point(x, y) in positions:
-        #             print("#", end="")
-        #         else:
-        #             print(".", end="")
-        #     print()
-        # print("===========", i)
-    # for x in considerations:
-    #     print(x, considerations[x])
-
-    # for y in range(-10, 20):
-    #     for x in range(-10, 20):
-    #         if Point(x, y) in positions:
-    #             print("#", end="")
-    #         else:
-    #             print(".", end="")
-    #     print()
-    # print("===========", i)
-
-    return i
-
-    # return calculate_points(positions)
-
-
-# if not any((position + direction) in positions for direction in SOUTH_MOVEMENT_CHECK):
-#     down_position = position + Direction.DOWN
-#     if down_position in considerations:
-#         considerations[down_position].append(position)
-#     else:
-#         considerations[down_position] = [position]
-#     continue
-
-# if not any((position + direction) in positions for direction in WEST_MOVEMENT_CHECK):
-#     left_position = position + Direction.LEFT
-#     if left_position in considerations:
-#         considerations[left_position].append(position)
-#     else:
-#         considerations[left_position] = [position]
-#     continue
-
-# if not any((position + direction) in positions for direction in EAST_MOVEMENT_CHECK):
-#     right_position = position + Direction.RIGHT
-#     if right_position in considerations:
-#         considerations[right_position].append(position)
-#     else:
-#         considerations[right_position] = [position]
-#     continue
+def gold_solution(lines: list[str]) -> int: # runs for ~13s
+    positions = parse_input(lines)
+    _, iterations = perform_movement(positions)
+    return iterations
