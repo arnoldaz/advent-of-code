@@ -79,40 +79,69 @@ def parse_input(lines: list[str]) -> tuple[BlizzardMap, Point, Point]:
 
     return blizzard_map, start, end
 
-def djikstra_search(blizzard_map: BlizzardMap, start: Point, end: Point) -> dict[Point, tuple[Point, int]]:
-    frontier = queue.Queue[Point]()
-    came_from: dict[Point, tuple[Point, int]] = {}
-    cost_so_far: dict[Point, int] = {}
+def djikstra_search(blizzard_map: BlizzardMap, start: Point, end: Point):
+    frontier = queue.Queue[tuple[Point, int]]()
+    came_from: dict[tuple[Point, int], tuple[Point, int]] = {}
+    # cost_so_far: dict[tuple[Point, int], int] = {}
 
-    frontier.put(start)
-    came_from[start] = (INVALID_POINT, 0)
-    cost_so_far[start] = 0
+    frontier.put((start, 0))
+    came_from[(start, -1)] = (INVALID_POINT, 0)
+    # cost_so_far[(start, -1)] = 0
 
     while not frontier.empty():
-        current = frontier.get()
+        # print(list(frontier.queue))
+        current, cost = frontier.get()
         if current == end:
             print("wowaweeva")
             break
 
         for neighbor in [current + direction for direction in Direction]:
-            current_cost = cost_so_far[current]
-            print("getting state level", current_cost + 1)
-            blizzards = blizzard_map.get_state(current_cost + 1) # cost equals to steps moved
-            if any(neighbor == position for position, _ in blizzards):
+            if neighbor == end:
+                print("neigh", neighbor, current)
+
+            new_cost = cost + 1
+            # current_cost = cost_so_far[current]
+            print("getting state level", new_cost, current, neighbor)
+            blizzards = blizzard_map.get_state(new_cost) # cost equals to steps moved
+
+            good = neighbor in (start, end)
+
+            if not good and any(neighbor == position for position, _ in blizzards):
                 continue
 
-            if not (0 <= neighbor.x <= blizzard_map.width - 1 and 0 <= neighbor.y <= blizzard_map.height - 1) and neighbor != end:
+            if not good and not (0 <= neighbor.x <= blizzard_map.width - 1 and 0 <= neighbor.y <= blizzard_map.height - 1):
                 continue
 
-            new_cost = cost_so_far[current] + 1
+            # new_cost = cost_so_far[current] + 1
             # if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
-            if new_cost < 100:
-                print(f"{new_cost=}")
-                cost_so_far[neighbor] = new_cost
-                came_from[neighbor] = (current, new_cost)
-                frontier.put(neighbor)
+            # if new_cost < 100:
+            print(f"{new_cost=}")
+            # cost_so_far[neighbor] = new_cost
+            came_from[(neighbor, new_cost)] = (current, cost)
+            frontier.put((neighbor, new_cost))
 
     return came_from
+
+# PointFrom = tuple[Point, Direction]
+# def djikstra_search(grid: Matrix[int], start: Point, possible_movements: list[tuple[Point, Direction]]):
+#     frontier = queue.Queue[PointFrom]()
+#     came_from: dict[PointFrom, Point] = {}
+#     cost_so_far: dict[PointFrom, int] = {}
+
+#     frontier.put((start, Direction.NONE))
+#     came_from[(start, Direction.NONE)] = INVALID_POINT
+#     cost_so_far[(start, Direction.NONE)] = 0
+
+#     while not frontier.empty():
+#         current, direction = frontier.get()
+#         for (neighbor, new_direction, cost) in get_valid_neighbors(current, direction, grid, possible_movements):
+#             new_cost = cost_so_far[(current, direction)] + cost
+#             if (neighbor, new_direction) not in cost_so_far or new_cost < cost_so_far[(neighbor, new_direction)]:
+#                 cost_so_far[(neighbor, new_direction)] = new_cost
+#                 came_from[(neighbor, new_direction)] = current
+#                 frontier.put((neighbor, new_direction))
+
+#     return cost_so_far
 
 def silver_solution(lines: list[str]) -> int:
     blizzard_map, start, end = parse_input(lines)
@@ -123,25 +152,31 @@ def silver_solution(lines: list[str]) -> int:
     for x, y in result.items():
         print(x, y)
 
-    for key, value in blizzard_map.blizzard_states.items():
-        print(f"blizzard key: {key}")
-        for y in range(blizzard_map.height):
-            for x in range(blizzard_map.width):
-                for a, b in value:
-                    if Point(x, y) == a:
-                        match b:
-                            case Direction.LEFT:
-                                print("<", end="")
-                            case Direction.RIGHT:
-                                print(">", end="")
-                            case Direction.UP:
-                                print("^", end="")
-                            case Direction.DOWN:
-                                print("v", end="")
-                        break
-                else:
-                    print(".", end="")
-            print()
+    for key_point, key_cost in result:
+        if key_point == end:
+            return key_cost
+
+
+
+    # for key, value in blizzard_map.blizzard_states.items():
+    #     print(f"blizzard key: {key}")
+    #     for y in range(blizzard_map.height):
+    #         for x in range(blizzard_map.width):
+    #             for a, b in value:
+    #                 if Point(x, y) == a:
+    #                     match b:
+    #                         case Direction.LEFT:
+    #                             print("<", end="")
+    #                         case Direction.RIGHT:
+    #                             print(">", end="")
+    #                         case Direction.UP:
+    #                             print("^", end="")
+    #                         case Direction.DOWN:
+    #                             print("v", end="")
+    #                     break
+    #             else:
+    #                 print(".", end="")
+    #         print()
 
     return -123
 

@@ -12,7 +12,7 @@ class Point:
         self.z = z
 
     def __str__(self) -> str:
-        return f"{{Point: x={self.x}, y={self.y}, z={self.z}}}"
+        return f"{{x={self.x}, y={self.y}, z={self.z}}}"
 
     def __repr__(self) -> str:
         return self.__str__()
