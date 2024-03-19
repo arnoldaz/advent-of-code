@@ -4,7 +4,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Current File",
+            "name": "Debug Current File (test)",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}\\main.py",
@@ -12,6 +12,16 @@
             "cwd": "${workspaceFolder}",
             "justMyCode": true,
             "args": ["-y", "${relativeFileDirname}", "-d", "${fileBasenameNoExtension}", "-t"],
+        },
+        {
+            "name": "Debug Current File (real)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}\\main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}",
+            "justMyCode": true,
+            "args": ["-y", "${relativeFileDirname}", "-d", "${fileBasenameNoExtension}"],
         }
     ]
 }

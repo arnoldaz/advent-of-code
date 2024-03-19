@@ -67,6 +67,9 @@ class Point:
 
         raise RuntimeError(f"Unrecognized variable compared to Point - {other}")
 
+    def copy(self) -> "Point":
+        return Point(self.x, self.y, self.z)
+
     def abs(self) -> "Point":
         return Point(abs(self.x), abs(self.y), abs(self.z))
 
