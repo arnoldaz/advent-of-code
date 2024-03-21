@@ -117,5 +117,52 @@ def silver_solution(lines: list[str]) -> int:
     return max((point.y + 1 for point in chamber), default=0)
 
 def gold_solution(lines: list[str]) -> int:
-    # Implement solution
-    return -321
+    directions = parse_input(lines)
+    chamber: list[Point] = []
+
+    current_direction_index = 0
+
+    cache: dict[tuple[int, int, int, int, int], int] = {}
+
+    single_cache: list[int] = []
+    previous_highest = 0
+
+    for i in range(ROCK_COUNT):
+        highest_point = max((point.y + 1 for point in chamber), default=0)
+
+        # print(highest_point, "AAA")
+
+        single_cache.append(highest_point - previous_highest)
+        previous_highest = highest_point
+        if i % len(SHAPES) == 0:
+            key = tuple[int, int, int, int, int](single_cache)
+            print(f"{key=} {key in cache=}")
+            cache[key] = i
+            single_cache = []
+
+        shape = SHAPES[i % len(SHAPES)].copy()
+
+
+
+        for point in shape.points:
+            point.x += 2
+            point.y += highest_point + 3
+
+        # print("START:")
+        # print_tower(chamber, shape)
+        # print("===============")
+
+        fall = True
+        while fall:
+            # if not all(can_push(x, Direction.UP, chamber) for x in shape.points):
+            #     break
+
+            fall_step(shape, chamber, directions[current_direction_index % len(directions)])
+            current_direction_index += 1
+            fall = fall_step(shape, chamber, Direction.UP) # uhhh need to make it down
+            # print_tower(chamber, shape)
+            # print("===============")
+
+        chamber += shape.copy().points
+
+    return max((point.y + 1 for point in chamber), default=0)
