@@ -80,6 +80,9 @@ def read_test_input(year: int, day: int) -> list[str]:
         return [line.rstrip() for line in file]
 
 def copy_template_file(year: int, day: int):
+    if not os.path.exists(year):
+        os.makedirs(str(year))
+
     module_file_path = get_solution_module_path(year, day)
     if os.path.exists(module_file_path):
         return
