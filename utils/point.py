@@ -34,6 +34,14 @@ class Point:
             direction_point = other.value
             return Point(self.x + direction_point.x, self.y + direction_point.y, self.z + direction_point.z)
 
+        if isinstance(other, DirectionDiagonal):
+            direction_point = other.value
+            return Point(self.x + direction_point.x, self.y + direction_point.y, self.z + direction_point.z)
+
+        if isinstance(other, DirectionOnlyDiagonal):
+            direction_point = other.value
+            return Point(self.x + direction_point.x, self.y + direction_point.y, self.z + direction_point.z)
+
         raise RuntimeError(f"Unrecognized variable added to Point - {other}")
 
     def __sub__(self, other) -> "Point":
@@ -158,6 +166,48 @@ class Direction(Enum):
     @staticmethod
     def valid_directions() -> list["Direction"]:
         return [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]
+
+class DirectionDiagonal(Enum):
+    NONE = Point(0, 0)
+    UP = Point(0, -1)
+    RIGHT = Point(1, 0)
+    DOWN = Point(0, 1)
+    LEFT = Point(-1, 0)
+    UP_LEFT = Point(-1, -1)
+    UP_RIGHT = Point(1, -1)
+    DOWN_LEFT = Point(-1, 1)
+    DOWN_RIGHT = Point(1, 1)
+
+    def __str__(self) -> str:
+        return f"{{{self.name}}}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return self.value * other
+
+        raise RuntimeError(f"Unrecognized variable multiplied with Direction - {other}")
+
+class DirectionOnlyDiagonal(Enum):
+    NONE = Point(0, 0)
+    UP_LEFT = Point(-1, -1)
+    UP_RIGHT = Point(1, -1)
+    DOWN_LEFT = Point(-1, 1)
+    DOWN_RIGHT = Point(1, 1)
+
+    def __str__(self) -> str:
+        return f"{{{self.name}}}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return self.value * other
+
+        raise RuntimeError(f"Unrecognized variable multiplied with Direction - {other}")
 
 def shoelace_area(vertices: list[Point]) -> float:
     n = len(vertices)

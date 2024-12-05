@@ -1,4 +1,4 @@
-from utils.point import INVALID_POINT, Direction, Point
+from utils.point import INVALID_POINT, Direction, DirectionDiagonal, DirectionOnlyDiagonal, Point
 
 class Matrix[T]:
     _data: list[list[T]]
@@ -30,6 +30,12 @@ class Matrix[T]:
 
     def get_neighbors(self, position: Point) -> list[tuple[Point, Direction]]:
         return [(position + direction.value, direction) for direction in Direction if direction != Direction.NONE and self.in_bounds(position + direction.value)]
+
+    def get_neighbors_diagonal(self, position: Point) -> list[tuple[Point, DirectionDiagonal]]:
+        return [(position + direction.value, direction) for direction in DirectionDiagonal if direction != DirectionDiagonal.NONE and self.in_bounds(position + direction.value)]
+
+    def get_neighbors_only_diagonal(self, position: Point) -> list[tuple[Point, DirectionOnlyDiagonal]]:
+        return [(position + direction.value, direction) for direction in DirectionOnlyDiagonal if direction != DirectionOnlyDiagonal.NONE and self.in_bounds(position + direction.value)]
 
     def find_first_character_instance(self, symbol_to_find: T) -> Point:
         for y, line in enumerate(self.get_data()):
