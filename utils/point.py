@@ -12,7 +12,10 @@ class Point:
         self.z = z
 
     def __str__(self) -> str:
-        return f"{{x={self.x}, y={self.y}, z={self.z}}}"
+        if self.z == 0:
+            return f"{{x={self.x}, y={self.y}}}"
+        else:
+            return f"{{x={self.x}, y={self.y}, z={self.z}}}"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -109,6 +112,9 @@ class Point:
             return Point(x_value, self.y)
 
         raise RuntimeError(f"Points {self} and {end} are diagonal")
+
+    def in_bounds_2d(self, width: int, height: int) -> bool:
+        return self.x >= 0 and self.x < width and self.y >= 0 and self.y < height
 
     # def between_points_ratio(self, start: "Point", end: "Point") -> float:
     #     if start.x == end.x: # vertical
