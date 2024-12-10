@@ -45,6 +45,15 @@ class Matrix[T]:
 
         return INVALID_POINT
 
+    def find_all_character_instances(self, symbol_to_find: T) -> list[Point]:
+        instances: list[Point] = []
+        for y, line in enumerate(self.get_data()):
+            for x, char in enumerate(line):
+                if char == symbol_to_find:
+                    instances.append(Point(x, y))
+
+        return instances
+
     def get_row(self, row_index: int) -> list[T]:
         return self._data[row_index]
 
