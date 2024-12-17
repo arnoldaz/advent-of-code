@@ -63,5 +63,5 @@ class Matrix[T]:
     def rotate_clockwise(self):
         self._data = [list(row) for row in zip(*reversed(self._data))]
 
-    def print(self, single_symbol_space: int):
+    def print(self, single_symbol_space: int = 1):
         print("\n".join(["".join([f"{item:>{single_symbol_space}}" for item in row]) for row in self._data]))
