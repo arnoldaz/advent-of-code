@@ -22,7 +22,7 @@ def create_price_mappings(numbers: list[int]) -> tuple[dict[int, list[int]], dic
 
     return digits_map, diffs_map
 
-def get_possible_sequences(digits_map: dict[int, list[int]], diffs_map: dict[int, list[int]]):
+def get_possible_sequences(digits_map: dict[int, list[int]], diffs_map: dict[int, list[int]]) -> dict[tuple[int, int, int, int], int]:
     sequence_price_map: dict[tuple[int, int, int, int], int] = {}
     for number, diffs in diffs_map.items():
         added_sequences = set()
