@@ -23,20 +23,20 @@ def create_price_mappings(numbers: list[int]) -> tuple[dict[int, list[int]], dic
     return digits_map, diffs_map
 
 def get_possible_sequences(digits_map: dict[int, list[int]], diffs_map: dict[int, list[int]]):
-    sequence_final: dict[tuple[int, int, int, int], int] = {}
-    for key, values in diffs_map.items():
+    sequence_price_map: dict[tuple[int, int, int, int], int] = {}
+    for number, diffs in diffs_map.items():
         added_sequences = set()
-        for i in range(len(values) - 3):
-            sequence = (values[i], values[i+1], values[i+2], values[i+3])
+        for i in range(len(diffs) - 3):
+            sequence = (diffs[i], diffs[i+1], diffs[i+2], diffs[i+3])
             if sequence in added_sequences:
                 continue
 
             added_sequences.add(sequence)
 
-            sell_price = digits_map[key][i+4]
-            sequence_final[sequence] = sequence_final.get(sequence, 0) + sell_price
+            sell_price = digits_map[number][i+4]
+            sequence_price_map[sequence] = sequence_price_map.get(sequence, 0) + sell_price
 
-    return sequence_final
+    return sequence_price_map
 
 def silver_solution(lines: list[str]) -> int:
     numbers = [int(line) for line in lines]
