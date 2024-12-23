@@ -4,13 +4,8 @@ def parse_input(lines: list[str]) -> tuple[list[int], list[int]]:
 
 def silver_solution(lines: list[str]) -> int:
     left_list, right_list = parse_input(lines)
-
-    left_list.sort()
-    right_list.sort()
-    
-    return sum(abs(left - right) for left, right in zip(left_list, right_list))
+    return sum(abs(left - right) for left, right in zip(sorted(left_list), sorted(right_list)))
 
 def gold_solution(lines: list[str]) -> int:
     left_list, right_list = parse_input(lines)
-
     return sum(left * right_list.count(left) for left in left_list)
