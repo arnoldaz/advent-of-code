@@ -43,12 +43,24 @@ def get_cheat_enough_saved_counter(cost_map: dict[Point, int], max_distance: int
     counter = 0
 
     for point in path:
-        for other_point in path:
-            distance = grid_distance(point, other_point)
-            if distance <= max_distance:
-                saved_amount = cost_map[other_point] - cost_map[point] - distance
-                if saved_amount >= minimum_saved:
-                    counter += 1
+        for y in range(-max_distance, max_distance + 1):
+            for x in range(-max_distance, max_distance + 1):
+                possible_path = point + Point(x, y)
+                if possible_path not in cost_map or point == possible_path:
+                    continue
+
+                distance = grid_distance(point, possible_path)
+                if distance <= max_distance:
+                    saved_amount = cost_map[possible_path] - cost_map[point] - distance
+                    if saved_amount >= minimum_saved:
+                        counter += 1
+
+        # for other_point in path:
+        #     distance = grid_distance(point, other_point)
+        #     if distance <= max_distance:
+        #         saved_amount = cost_map[other_point] - cost_map[point] - distance
+        #         if saved_amount >= minimum_saved:
+        #             counter += 1
 
     return counter
 

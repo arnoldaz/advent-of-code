@@ -167,21 +167,38 @@ def silver_solution(lines: list[str]) -> int:
 
         initials = get_keypad_codes(keypad, code)
 
-        for initial in initials:
-            subs = get_keypad_codes(directional_keypard, initial)
+        print("init", initials)
 
-            # mina = min(subs, key=lambda x: len(x))
-            # if len(mina) <= min_len:
-            #     min_len = min(min_len, len(mina))
-            #     mins.append(mina)
+        for i in range(26):
+            print(i, len(initials))
+            new_initials: list[str] = []
+            for initial in initials:
+                subs = get_keypad_codes(directional_keypard, initial)
+                new_initials += subs
 
-            for sub in subs:
-                sub_subs = get_keypad_codes(directional_keypard, sub)
-                # print("ccc", sub_subs[0])
-                mina = min(sub_subs, key=lambda x: len(x))
-                if len(mina) <= min_len:
-                    min_len = min(min_len, len(mina))
-                    mins.append(mina)
+            min_cost = len(min(new_initials, key=lambda x: len(x)))
+            initials = [path for path in new_initials if len(path) == min_cost]
+
+        mina = min(initials, key=lambda x: len(x))
+        if len(mina) <= min_len:
+            min_len = min(min_len, len(mina))
+            mins.append(mina)
+
+        # for initial in initials:
+        #     subs = get_keypad_codes(directional_keypard, initial)
+
+        #     # mina = min(subs, key=lambda x: len(x))
+        #     # if len(mina) <= min_len:
+        #     #     min_len = min(min_len, len(mina))
+        #     #     mins.append(mina)
+
+        #     for sub in subs:
+        #         sub_subs = get_keypad_codes(directional_keypard, sub)
+        #         # print("ccc", sub_subs[0])
+        #         mina = min(sub_subs, key=lambda x: len(x))
+        #         if len(mina) <= min_len:
+        #             min_len = min(min_len, len(mina))
+        #             mins.append(mina)
 
         code_num = int(code.removesuffix("A"))
         print(min_len, "*", code_num)
