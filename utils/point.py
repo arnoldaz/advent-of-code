@@ -1,6 +1,74 @@
 from enum import Enum
 import math
 
+class Point2d:
+    def __init__(self, x: int = 0, y: int = 0):
+        self.x = x
+        self.y = y
+
+    def __str__(self) -> str:
+        return f"{{{self.x}, {self.y}}}"
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __hash__(self) -> int:
+        return hash((self.x, self.y))
+
+    def __add__(self, other) -> "Point2d":
+        if other is None:
+            raise RuntimeError(f"Adding 'None' to 'Point2d' - {self}")
+
+        if isinstance(other, Point2d):
+            return Point2d(self.x + other.x, self.y + other.y)
+
+        if isinstance(other, int):
+            return Point2d(self.x + other, self.y + other)
+
+        if isinstance(other, Direction):
+            return Point2d(self.x + other.value.x, self.y + other.value.y)
+        
+        raise RuntimeError(f"Unrecognized variable added to 'Point2d' - {other}")
+ 
+    def __sub__(self, other) -> "Point2d":
+        if other is None:
+            raise RuntimeError(f"Subtracting 'None' from 'Point2d' - {self}")
+
+        if isinstance(other, Point2d):
+            return Point2d(self.x - other.x, self.y - other.y)
+
+        if isinstance(other, int):
+            return Point2d(self.x - other, self.y - other)
+
+        if isinstance(other, Direction):
+            return Point2d(self.x - other.value.x, self.y - other.value.y)
+
+        raise RuntimeError(f"Unrecognized variable subtracted from 'Point2d' - {other}")
+
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return Point2d(self.x * other, self.y * other)
+
+        raise RuntimeError(f"Unrecognized variable multiplied with 'Point2d' - {other}")
+
+    def __eq__(self, other) -> bool:
+        if other is None:
+            return False
+
+        if isinstance(other, Point2d):
+            return self.x == other.x and self.y == other.y
+
+        raise RuntimeError(f"Unrecognized variable compared to 'Point2d' - {other}")
+
+    def copy(self) -> "Point2d":
+        return Point2d(self.x, self.y)
+
+    def abs(self) -> "Point2d":
+        return Point2d(abs(self.x), abs(self.y))
+
+    def in_bounds(self, width: int, height: int) -> bool:
+        return self.x >= 0 and self.x < width and self.y >= 0 and self.y < height
+
 class Point:
     x: int
     y: int
@@ -167,11 +235,25 @@ class Direction(Enum):
         if isinstance(other, int):
             return self.value * other
 
-        raise RuntimeError(f"Unrecognized variable multiplied with Direction - {other}")
+        raise RuntimeError(f"Unrecognized variable multiplied with 'Direction' - {other}")
 
     @staticmethod
     def valid_directions() -> list["Direction"]:
         return [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]
+
+    @staticmethod
+    def from_character(char: str) -> "Direction":
+        match char:
+            case "^":
+                return Direction.UP
+            case ">":
+                return Direction.RIGHT
+            case "v":
+                return Direction.DOWN
+            case "<":
+                return Direction.LEFT
+            case _:
+                return Direction.NONE
 
 class DirectionDiagonal(Enum):
     NONE = Point(0, 0)

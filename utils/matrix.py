@@ -1,4 +1,4 @@
-from utils.point import INVALID_POINT, Direction, DirectionDiagonal, DirectionOnlyDiagonal, Point
+from utils.point import INVALID_POINT, Direction, DirectionDiagonal, DirectionOnlyDiagonal, Point, Point2d
 
 class Matrix[T]:
     _data: list[list[T]]
@@ -19,10 +19,22 @@ class Matrix[T]:
         assert len(data) > 0 and len(data[0]) > 0
         self._data = [[cast_type(char) for char in string] for string in data]
 
+    @staticmethod
+    def create_empty(symbol: int, width: int, height: int):
+        data = [[symbol for _ in range(width)] for _ in range(height)]
+        return Matrix[int](data, int)
+
     def get_symbol(self, position: Point) -> T:
         return self._data[position.y][position.x]
 
+    def get_symbol_2d(self, position: Point2d) -> T:
+        return self._data[position.y][position.x]
+
     def set_symbol(self, position: Point, symbol: T):
+        self._data[position.y][position.x] = symbol
+
+    # TODO: make it the main one
+    def set_symbol_2d(self, position: Point2d, symbol: T):
         self._data[position.y][position.x] = symbol
 
     def in_bounds(self, position: Point) -> bool:
@@ -53,6 +65,15 @@ class Matrix[T]:
                     instances.append(Point(x, y))
 
         return instances
+
+    def count_all_character_instances(self, symbol_to_count: T) -> int:
+        counter = 0
+        for y, line in enumerate(self.get_data()):
+            for x, char in enumerate(line):
+                if char == symbol_to_count:
+                    counter += 1
+
+        return counter
 
     def get_row(self, row_index: int) -> list[T]:
         return self._data[row_index]
