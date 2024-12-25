@@ -1,4 +1,4 @@
-# pylint: disable=unused-argument
+# pylint: disable-all
 
 def silver_solution(lines: list[str]) -> int:
     # Implement solution
