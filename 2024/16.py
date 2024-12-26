@@ -1,4 +1,4 @@
-# pylint: disable=unused-argument
+# pylint: disable-all
 
 import queue
 import sys
@@ -275,16 +275,20 @@ def find_all_paths(graph: dict[Point, dict[Direction, tuple[int, Point, Directio
 #     return cost_so_far
 
 def djikstra_search(grid: Matrix[str], start: Point, end: Point):
-    frontier = queue.Queue[tuple[Point, Direction]]()
+    frontier = queue.Queue[tuple[Point, Direction, list[Point]]]()
     came_from: dict[tuple[Point, Direction], Point] = {}
     cost_so_far: dict[tuple[Point, Direction], int] = {}
 
-    frontier.put((start, Direction.NONE))
-    came_from[(start, Direction.NONE)] = INVALID_POINT
-    cost_so_far[(start, Direction.NONE)] = 0
+    all_paths: list[tuple[list[Point], int]] = []
+    if start == end:
+        all_paths.append(([], 0))
+
+    frontier.put((start, Direction.RIGHT, []))
+    came_from[(start, Direction.RIGHT)] = INVALID_POINT
+    cost_so_far[(start, Direction.RIGHT)] = 0
 
     while not frontier.empty():
-        current, direction = frontier.get()
+        current, direction, path = frontier.get()
         # if current == end:
         #     break
 
@@ -292,16 +296,30 @@ def djikstra_search(grid: Matrix[str], start: Point, end: Point):
             if grid.get_symbol(neighbor) == "#":
                 continue
 
+            if neighbor in path:
+                continue
+
             cost = 1
             if direction != new_direction:
                 cost += 1000
 
-            new_cost = cost_so_far[(current, direction)] + cost
-            if (neighbor, new_direction) not in cost_so_far or new_cost < cost_so_far[(neighbor, new_direction)]:
-                cost_so_far[(neighbor, new_direction)] = new_cost
-                came_from[(neighbor, new_direction)] = current
-                frontier.put((neighbor, new_direction))
 
+            new_cost = cost_so_far[(current, direction)] + cost
+            # if new_cost > 10000:
+            #     continue
+            if (neighbor, new_direction) not in cost_so_far or new_cost <= cost_so_far[(neighbor, new_direction)]:
+                cost_so_far[(neighbor, new_direction)] = new_cost
+                new_path = path + [neighbor]
+                came_from[(neighbor, new_direction)] = current
+                frontier.put((neighbor, new_direction, new_path))
+                # print(new_path, new_cost, "AAAAScxvxcvcxv")
+                if neighbor == end:
+                    all_paths.append((new_path, new_cost))
+            elif new_cost == cost_so_far[(neighbor, new_direction)]:
+                print(neighbor, new_direction, new_cost)
+
+        if len(came_from) % 1000 == 0:
+            print(len(came_from))
 
             # new_cost = cost_so_far[current] + 1
             # if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
@@ -309,9 +327,58 @@ def djikstra_search(grid: Matrix[str], start: Point, end: Point):
             #     came_from[neighbor] = current
             #     frontier.put(neighbor)
 
-    return cost_so_far
+    min_cost = min(all_paths, key=lambda x: x[1])[1]
+    good_paths = [(path, cost) for path, cost in all_paths if cost == min_cost]
+    print("\nmin", min_cost, len(all_paths), len(good_paths), all_paths)
+    return cost_so_far, came_from, good_paths
+
+def djikstra_search1(grid: Matrix[str], start: Point, end: Point):
+    frontier = queue.Queue[tuple[Point, Direction, list[Point]]]()
+    cost_so_far: dict[tuple[Point, Direction], int] = {}
+
+    all_paths: list[tuple[list[Point], int]] = []
+
+    if start == end:
+        all_paths.append(([], 0))
+
+    frontier.put((start, Direction.NONE, []))
+    cost_so_far[(start, Direction.NONE)] = 0
+
+    while not frontier.empty():
+        current, current_dir, path = frontier.get()
+        for (neighbor, dir) in grid.get_neighbors(current):
+            if grid.get_symbol(neighbor) == "":
+                continue
+
+            if neighbor in path:
+                continue
+
+            direction_change_penalty = 0 if current_dir == dir else 0
+
+            new_cost = cost_so_far[(current, current_dir)] + 1 + direction_change_penalty
+            if new_cost > 105496:
+                continue
+
+            if (neighbor, dir) not in cost_so_far or new_cost <= cost_so_far[(neighbor, dir)]:
+                cost_so_far[(neighbor, dir)] = new_cost
+                new_path = path + [neighbor]
+                frontier.put((neighbor, dir, new_path))
+                if neighbor == end:
+                    all_paths.append((new_path, new_cost))
+
+    min_cost = min(all_paths, key=lambda x: x[1])[1]
+    return [path for path, cost in all_paths if cost == min_cost]
 
 def reconstruct_shortest_path(came_from: dict[tuple[Point, Direction], Point], start: Point, end: Point) -> Optional[list[Point]]:
+    # print("aa")
+    # print(came_from)
+    # new_came_from: dict[Point, Point] = {}
+    # for (x1, x2), y in came_from.items():
+    #     new_came_from[x1] = y
+
+    # print("bb")
+    # print(new_came_from)
+
     current = end
     path: list[Point] = []
 
@@ -329,35 +396,58 @@ def reconstruct_shortest_path(came_from: dict[tuple[Point, Direction], Point], s
 
 def silver_solution(lines: list[str]) -> int:
     grid, start, end = parse_input(lines)
+    # end = Point(7, 129)
 
-    result = djikstra_search(grid, start, end)
-    # path = reconstruct_shortest_path(result, start, end)
+    result, came_from, paths = djikstra_search(grid, start, end)
+    # path = reconstruct_shortest_path(came_from, start, end)
 
-    abc = []
-    for x in result:
-        a, b = x
-        if a == end:
-            abc.append(result[x])
-        # print(x, result[x])
+    print(start, end)
+    for a in result:
+        print(a, result[a])
 
-    print(abc)
-    return min(abc)
 
-    return 1
+    places = set()
+    for path, x in paths:
+        print("\nAAAAASASASAS", path, x)
+        for p in path:
+            places.add(p)
+
+    places.add(start)
+    places.add(end)
+
+    for x in places:
+        grid.set_symbol(x, "O")
+
+    grid.print()
+
+    return len(places)
+
+    # abc = []
+    # for x in result:
+    #     a, b = x
+    #     if a == end:
+    #         # print(a, b)
+    #         abc.append(result[x])
+    #     # print(x, result[x])
+
+    # # print(abc)
+    # return min(abc)
+
+    # return 1
 
     graph_dict = create_graph(grid, start, end)
 
     print(len(graph_dict))
-    for x in graph_dict.keys():
-        print(x, graph_dict[x])
+    # for x in graph_dict.keys():
+    #     print(x, graph_dict[x])
     print("============================================================================================================================================")
 
-    all_paths = find_all_paths(graph_dict, start, end, [], [], Direction.RIGHT, 0)
-    # a = get_paths_bfs(graph_dict, start, end)
+    # all_paths = find_all_paths(graph_dict, start, end, [], [], Direction.RIGHT, 0)
+    # # a = get_paths_bfs(graph_dict, start, end)
 
-    print("PATHS:")
-    for path in all_paths:
-        print(path)
+    # print("PATHS:")
+    # for path in all_paths:
+    #     print(path)
 
 
     # for path in all_paths:
