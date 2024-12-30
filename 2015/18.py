@@ -1,13 +1,9 @@
 from collections import Counter
+from utils.grid import Grid
 from utils.point2d import Point2d
 
 def parse_input(lines: list[str]) -> tuple[set[Point2d], int, int]:
-    live_cells = set[Point2d]()
-    for y, line in enumerate(lines):
-        for x, symbol in enumerate(line):
-            if symbol == "#":
-                live_cells.add(Point2d(x, y))
-
+    live_cells = {point for point, symbol in Grid.iterate_lines(lines) if symbol == "#"}
     return live_cells, len(lines[0]), len(lines)
 
 def silver_solution(lines: list[str]) -> int:

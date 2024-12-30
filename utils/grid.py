@@ -1,4 +1,4 @@
-from typing import Generator
+from collections.abc import Iterator
 from utils.point2d import Point2d, Direction2d
 
 class Grid[T]:
@@ -88,8 +88,15 @@ class Grid[T]:
             )
         )
 
-    def iterate(self) -> Generator[tuple[Point2d, T], None, None]:
+    def iterate(self) -> Iterator[tuple[Point2d, T]]:
         for y in range(self.height()):
             for x in range(self.width()):
                 point = Point2d(x, y)
                 yield (point, self.get_symbol(point))
+
+    @staticmethod
+    def iterate_lines(lines: list[str]) -> Iterator[tuple[Point2d, str]]:
+        width, height = len(lines[0]), len(lines)
+        for y in range(height):
+            for x in range(width):
+                yield (Point2d(x, y), lines[y][x])
