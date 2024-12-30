@@ -1,7 +1,5 @@
 from enum import Enum
 
-from networkx import neighbors
-
 class Point2d:
     def __init__(self, x: int, y: int):
         self.x = x

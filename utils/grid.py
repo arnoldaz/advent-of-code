@@ -29,11 +29,18 @@ class Grid[T]:
     def in_bounds(self, position: Point2d) -> bool:
         return 0 <= position.x < self.width() and 0 <= position.y < self.height()
 
-    def get_neighbors(self, position: Point2d, include_diagonal: bool = False, exclude_orthogonal: bool = False) -> list[tuple[Point2d, Direction2d]]:
+    def get_neighbors(self, position: Point2d, include_diagonal: bool = False, exclude_orthogonal: bool = False) -> list[Point2d]:
         return [
-            (position + direction.value, direction)
+            neighbor
             for direction in Direction2d.get_all_directions(include_diagonal, exclude_orthogonal)
-            if self.in_bounds(position + direction.value)
+            if (neighbor := position + direction) and self.in_bounds(neighbor)
+        ]
+
+    def get_neighbors_with_directions(self, position: Point2d, include_diagonal: bool = False, exclude_orthogonal: bool = False) -> list[tuple[Point2d, Direction2d]]:
+        return [
+            (neighbor, direction)
+            for direction in Direction2d.get_all_directions(include_diagonal, exclude_orthogonal)
+            if (neighbor := position + direction) and self.in_bounds(neighbor)
         ]
 
     def find_first_character_instance(self, symbol_to_find: T) -> Point2d:
