@@ -1,16 +1,7 @@
-from enum import Enum
-from typing import NamedTuple, Optional
-
-class Operation(Enum):
-    NONE = 0
-    AND = 1
-    OR = 2
-    LSHIFT = 3
-    RSHIFT = 4
-    NOT = 5
+from typing import Callable, NamedTuple, Optional
 
 class Instruction(NamedTuple):
-    operation: Operation
+    operation: Callable[[int, int], int]
     left: str
     right: str
     destination: str
@@ -20,22 +11,22 @@ def parse_input(lines: list[str]):
     for line in lines:
         data, destination = line.split(" -> ")
         if "AND" in data:
-            operation = Operation.AND
+            operation = lambda x, y: x & y
             left, right = data.split(" AND ")
         elif "OR" in data:
-            operation = Operation.OR
+            operation = lambda x, y: x | y
             left, right = data.split(" OR ")
         elif "LSHIFT" in data:
-            operation = Operation.LSHIFT
+            operation = lambda x, y: x << y
             left, right = data.split(" LSHIFT ")
         elif "RSHIFT" in data:
-            operation = Operation.RSHIFT
+            operation = lambda x, y: x >> y
             left, right = data.split(" RSHIFT ")
         elif "NOT" in data:
-            operation = Operation.NOT
+            operation = lambda x, _: ~x
             left, right = data.removeprefix("NOT "), ""
         else:
-            operation = Operation.NONE
+            operation = lambda x, _: x
             left, right = data, ""
 
         instructions.append(Instruction(operation, left, right, destination))
@@ -54,6 +45,8 @@ def get_operand_values(instruction: Instruction, current_signals: dict[str, int]
         right = int(instruction.right)
     elif instruction.right in current_signals:
         right = current_signals[instruction.right]
+    elif instruction.right == "":
+        right = 0
 
     return left, right
 
@@ -63,31 +56,9 @@ def calculate_signals(instructions: list[Instruction], signals: dict[str, int]):
             if instruction.destination in signals:
                 continue
 
-            match instruction.operation:
-                case Operation.NONE:
-                    left, _ = get_operand_values(instruction, signals)
-                    if left is not None:
-                        signals[instruction.destination] = left
-                case Operation.AND:
-                    left, right = get_operand_values(instruction, signals)
-                    if left is not None and right is not None:
-                        signals[instruction.destination] = left & right
-                case Operation.OR:
-                    left, right = get_operand_values(instruction, signals)
-                    if left is not None and right is not None:
-                        signals[instruction.destination] = left | right
-                case Operation.LSHIFT:
-                    left, right = get_operand_values(instruction, signals)
-                    if left is not None and right is not None:
-                        signals[instruction.destination] = left << right
-                case Operation.RSHIFT:
-                    left, right = get_operand_values(instruction, signals)
-                    if left is not None and right is not None:
-                        signals[instruction.destination] = left >> right
-                case Operation.NOT:
-                    left, _ = get_operand_values(instruction, signals)
-                    if left is not None:
-                        signals[instruction.destination] = ~left
+            left, right = get_operand_values(instruction, signals)
+            if left is not None and right is not None:
+                signals[instruction.destination] = instruction.operation(left, right)
 
 def silver_solution(lines: list[str]) -> int:
     instructions = parse_input(lines)
