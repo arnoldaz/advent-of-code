@@ -9,6 +9,7 @@ disable=
     too-many-branches,
     too-many-locals,
     too-many-arguments,
+    unnecessary-lambda-assignment,
 
 [BASIC]
 
