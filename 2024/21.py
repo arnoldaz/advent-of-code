@@ -1,3 +1,4 @@
+# pylint: disable-all
 import itertools
 import queue
 from utils.matrix import Matrix

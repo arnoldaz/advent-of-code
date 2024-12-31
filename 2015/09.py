@@ -1,4 +1,4 @@
-import itertools
+from itertools import permutations
 
 def parse_input(lines: list[str]) -> dict[str, dict[str, int]]:
     distance_map: dict[str, dict[str, int]] = {}
@@ -11,7 +11,7 @@ def parse_input(lines: list[str]) -> dict[str, dict[str, int]]:
 
 def get_all_distances(distance_map: dict[str, dict[str, int]]) -> list[int]:
     return [sum(distance_map[location][next_location] for location, next_location in zip(permutation, permutation[1:]))
-            for permutation in itertools.permutations(distance_map.keys())]
+            for permutation in permutations(distance_map.keys())]
 
 def silver_solution(lines: list[str]) -> int:
     distance_map = parse_input(lines)

@@ -1,7 +1,7 @@
-from utils.point import Direction, Point2d
+from utils.point2d import Direction2d, Point2d
 
-def parse_input(lines: list[str]) -> list[Direction]:
-    return [Direction.from_character(direction) for direction in lines[0]]
+def parse_input(lines: list[str]) -> list[Direction2d]:
+    return [Direction2d.from_character(direction) for direction in lines[0]]
 
 def silver_solution(lines: list[str]) -> int:
     directions = parse_input(lines)

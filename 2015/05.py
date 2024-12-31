@@ -18,8 +18,8 @@ def is_string_nice_updated(string: str) -> bool:
     for i in range(1, len(string)-1):
         if string[i-1] == string[i+1]:
             return True
-    else:
-        return False
+
+    return False
 
 def silver_solution(lines: list[str]) -> int:
     return sum(1 for string in lines if is_string_nice(string))

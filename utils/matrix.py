@@ -1,4 +1,5 @@
-from utils.point import INVALID_POINT, Direction, DirectionDiagonal, DirectionOnlyDiagonal, Point, Point2d
+from utils.point import INVALID_POINT, Direction, DirectionDiagonal, DirectionOnlyDiagonal, Point
+from utils.point2d import Point2d
 
 class Matrix[T]:
     _data: list[list[T]]

@@ -2,9 +2,9 @@ from dataclasses import dataclass
 from enum import Enum
 import re
 
+# TODO use grid
 from utils.matrix import Matrix
-from utils.point import Point2d
-
+from utils.point2d import Point2d
 
 class Operation(Enum):
     TURN_ON = 1
@@ -31,10 +31,10 @@ def parse_input(lines: list[str]):
             case "toggle":
                 operation = Operation.TOGGLE
             case _:
-                raise
+                raise ValueError("wtf")
 
         instructions.append(Instruction(operation, Point2d(int(start_x), int(start_y)), Point2d(int(end_x), int(end_y))))
-        
+
     return instructions
 
 # TODO: optimize
