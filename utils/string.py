@@ -1,9 +1,9 @@
 import re
 
-# checks whether strings differ by 1 character
-def nearly_equal(string1: str | list[str], string2: str | list[str]) -> bool:
+def nearly_equal(first: str | list[str], second: str | list[str]) -> bool:
+    """Checks whether the strings only differ by 1 character"""
     count_diffs = 0
-    for a, b in zip(string1, string2):
+    for a, b in zip(first, second):
         if a == b:
             continue
 
@@ -14,6 +14,7 @@ def nearly_equal(string1: str | list[str], string2: str | list[str]) -> bool:
 
     return count_diffs == 1
 
-def get_ints(string: str, allow_negative = False) -> list[int]:
+def get_ints(string: str, allow_negative: bool = False) -> list[int]:
+    """Gets all integers from a string using regex"""
     regex = r"\d+" if not allow_negative else r"-*\d+"
     return [int(x) for x in re.findall(regex, string)]
