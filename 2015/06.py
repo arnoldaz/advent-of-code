@@ -1,9 +1,8 @@
-from dataclasses import dataclass
-from enum import Enum
 import re
+from enum import Enum
+from typing import NamedTuple
 
-# TODO use grid
-from utils.matrix import Matrix
+from utils.grid import Grid
 from utils.point2d import Point2d
 
 class Operation(Enum):
@@ -11,8 +10,7 @@ class Operation(Enum):
     TURN_OFF = 2
     TOGGLE = 3
 
-@dataclass
-class Instruction:
+class Instruction(NamedTuple):
     operation: Operation
     start_corner: Point2d
     end_corner: Point2d
@@ -30,17 +28,14 @@ def parse_input(lines: list[str]):
                 operation = Operation.TURN_OFF
             case "toggle":
                 operation = Operation.TOGGLE
-            case _:
-                raise ValueError("wtf")
 
         instructions.append(Instruction(operation, Point2d(int(start_x), int(start_y)), Point2d(int(end_x), int(end_y))))
 
     return instructions
 
-# TODO: optimize
 def silver_solution(lines: list[str]) -> int:
     instructions = parse_input(lines)
-    grid = Matrix.create_empty(0, 1000, 1000)
+    grid = Grid.create_empty(0, 1000, 1000)
 
     for instruction in instructions:
         for y in range(instruction.start_corner.y, instruction.end_corner.y + 1):
@@ -48,18 +43,17 @@ def silver_solution(lines: list[str]) -> int:
                 point = Point2d(x, y)
                 match instruction.operation:
                     case Operation.TURN_ON:
-                        grid.set_symbol_2d(point, 1)
+                        grid.set_symbol(point, 1)
                     case Operation.TURN_OFF:
-                        grid.set_symbol_2d(point, 0)
+                        grid.set_symbol(point, 0)
                     case Operation.TOGGLE:
-                        grid.set_symbol_2d(point, 1 if grid.get_symbol_2d(point) == 0 else 0)
+                        grid.set_symbol(point, 1 if grid.get_symbol(point) == 0 else 0)
 
     return grid.count_all_character_instances(1)
 
-# TODO: optimize
 def gold_solution(lines: list[str]) -> int:
     instructions = parse_input(lines)
-    grid = Matrix.create_empty(0, 1000, 1000)
+    grid = Grid.create_empty(0, 1000, 1000)
 
     for instruction in instructions:
         for y in range(instruction.start_corner.y, instruction.end_corner.y + 1):
@@ -67,11 +61,11 @@ def gold_solution(lines: list[str]) -> int:
                 point = Point2d(x, y)
                 match instruction.operation:
                     case Operation.TURN_ON:
-                        grid.set_symbol_2d(point, grid.get_symbol_2d(point) + 1)
+                        grid.set_symbol(point, grid.get_symbol(point) + 1)
                     case Operation.TURN_OFF:
-                        grid.set_symbol_2d(point, max(0, grid.get_symbol_2d(point) - 1))
+                        grid.set_symbol(point, max(0, grid.get_symbol(point) - 1))
                     case Operation.TOGGLE:
-                        grid.set_symbol_2d(point, grid.get_symbol_2d(point) + 2)
+                        grid.set_symbol(point, grid.get_symbol(point) + 2)
 
     brightness = 0
 
