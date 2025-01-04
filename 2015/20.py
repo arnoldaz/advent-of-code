@@ -1,59 +1,29 @@
-# pylint: disable-all
-
-def find_divisors(n): 
-    divisors = set[int]()
-    for i in range(1, int(n**0.5) + 1): 
-        if n % i == 0:
-            divisors.add(i * 10)
-            divisors.add(n // i * 10)
-    return sum(divisors) 
-    
-def find_divisors2(n): 
-    divisors = set[int]()
-    for i in range(1, int(n**0.5) + 1): 
-        if n % i == 0:
-            if n <= i * 50:
-                divisors.add(i * 11)
-            if n <= n // i * 50:
-                divisors.add(n // i * 11)
-    return sum(divisors) 
-    
-
-
 def silver_solution(lines: list[str]) -> int:
-    input = int(lines[0])
+    min_present_number = int(lines[0])
+    limit = 1_000_000
 
-    i = 1
-    while True:
-        presents = find_divisors(i)
-        if presents >= input:
-            break
+    sigma_cache = [0] * (limit + 1)
+    for i in range(1, limit + 1):
+        for j in range(i, limit + 1, i):
+            sigma_cache[j] += i
 
-        i += 1
+    for i in range(limit + 1):
+        if sigma_cache[i] * 10 > min_present_number:
+            return i
 
-        if i % 100000 == 0:
-            print(i)
-
-    # for i in range(10):
-    #     print(find_divisors(i))
-
-    return i
+    return -1
 
 def gold_solution(lines: list[str]) -> int:
-    input = int(lines[0])
+    min_present_number = int(lines[0])
+    limit = 1_000_000
 
-    i = 1
-    while True:
-        presents = find_divisors2(i)
-        if presents >= input:
-            break
+    sigma_cache = [0] * (limit + 1)
+    for i in range(1, limit + 1):
+        for j in range(i, min(i * 50 + 1, limit + 1), i):
+            sigma_cache[j] += i
 
-        i += 1
+    for i in range(limit + 1):
+        if sigma_cache[i] * 11 > min_present_number:
+            return i
 
-        if i % 100000 == 0:
-            print(i)
-
-    # for i in range(10):
-    #     print(find_divisors(i))
-
-    return i
+    return -1
