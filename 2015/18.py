@@ -1,4 +1,5 @@
 from collections import Counter
+
 from utils.grid import Grid
 from utils.point2d import Point2d
 

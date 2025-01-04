@@ -1,4 +1,5 @@
 from collections.abc import Iterator
+from typing import Optional
 from utils.point2d import Point2d, Direction2d
 
 class Grid[T]:
@@ -88,9 +89,11 @@ class Grid[T]:
             )
         )
 
-    def iterate(self) -> Iterator[tuple[Point2d, T]]:
-        for y in range(self.height()):
-            for x in range(self.width()):
+    def iterate(self, start: Optional[Point2d] = None, end: Optional[Point2d] = None) -> Iterator[tuple[Point2d, T]]:
+        start = start if start is not None else Point2d(0, 0)
+        end = end if end is not None else Point2d(self.width(), self.height())
+        for y in range(start.y, end.y):
+            for x in range(start.x, end.x):
                 point = Point2d(x, y)
                 yield (point, self.get_symbol(point))
 
