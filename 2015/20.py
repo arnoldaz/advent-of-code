@@ -1,3 +1,7 @@
+# Uses modified Eratosthenes sieve to calculate sum of divisors in O(n log n)
+# https://codereview.stackexchange.com/questions/120572/computing-the-divisor-sum-in-bulk-without-division-multiplication-or-factorisat
+# https://codeforces.com/blog/entry/22229
+
 def silver_solution(lines: list[str]) -> int:
     min_present_number = int(lines[0])
     limit = 1_000_000
