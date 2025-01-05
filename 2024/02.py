@@ -14,10 +14,9 @@ def check_safe(number_list: list[int]) -> bool:
             return False
 
     return True
-  
+
 def silver_solution(lines: list[str]) -> int:
     number_lists = parse_input(lines)
-
     return sum(1 for number_list in number_lists if check_safe(number_list))
 
 def gold_solution(lines: list[str]) -> int:

@@ -5,7 +5,6 @@ def silver_solution(lines: list[str]) -> int:
     line = "".join(lines)
 
     matches = re.findall(mul_format, line)
-
     return sum(int(match[0]) * int(match[1]) for match in matches)
 
 def gold_solution(lines: list[str]) -> int:
