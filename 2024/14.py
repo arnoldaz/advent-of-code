@@ -2,6 +2,8 @@ import re
 from typing import NamedTuple
 from utils.point import Point
 
+# TODO
+
 class Robot(NamedTuple):
     position: Point
     velocity: Point

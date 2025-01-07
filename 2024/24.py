@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import NamedTuple
 
+# TODO
+
 class Operation(Enum):
     AND = 1
     OR = 2

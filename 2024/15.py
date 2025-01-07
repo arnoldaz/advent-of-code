@@ -1,9 +1,11 @@
 from utils.matrix import Matrix
 from utils.point import INVALID_POINT, Direction, Point
 
+# TODO refactor
+
 def parse_input(lines: list[str], is_gold: bool):
     empty_line = lines.index("")
-    
+
     if not is_gold:
         grid = Matrix[str](lines[:empty_line], str)
     else:
@@ -65,7 +67,7 @@ def move(grid: Matrix[str], current_position: Point, direction: Direction) -> Po
                 if grid.get_symbol(further_positions[0]) == "]":
                     further_positions.insert(0, further_positions[0] + Direction.LEFT)
                 saved_further_positions.append([x for x in further_positions if grid.get_symbol(x) != "."])
-                
+
                 if any(grid.get_symbol(x) == "#" for x in further_positions):
                     return current_position
                 elif all(grid.get_symbol(x) == "." for x in further_positions):
@@ -77,7 +79,7 @@ def move(grid: Matrix[str], current_position: Point, direction: Direction) -> Po
 
                     grid.set_symbol(next_position, "@")
                     grid.set_symbol(current_position, ".")
-                    return next_position 
+                    return next_position
                 else:
                     further_positions = [x + direction for x in further_positions if grid.get_symbol(x) == "[" or grid.get_symbol(x) == "]"]
                     continue
@@ -113,7 +115,7 @@ def move(grid: Matrix[str], current_position: Point, direction: Direction) -> Po
                 if grid.get_symbol(further_positions[0]) == "]":
                     further_positions.insert(0, further_positions[0] + Direction.LEFT)
                 saved_further_positions.append([x for x in further_positions if grid.get_symbol(x) != "."])
-                
+
                 if any(grid.get_symbol(x) == "#" for x in further_positions):
                     return current_position
                 elif all(grid.get_symbol(x) == "." for x in further_positions):
@@ -125,7 +127,7 @@ def move(grid: Matrix[str], current_position: Point, direction: Direction) -> Po
 
                     grid.set_symbol(next_position, "@")
                     grid.set_symbol(current_position, ".")
-                    return next_position 
+                    return next_position
                 else:
                     further_positions = [x + direction for x in further_positions if grid.get_symbol(x) == "[" or grid.get_symbol(x) == "]"]
                     continue
@@ -157,7 +159,7 @@ def move(grid: Matrix[str], current_position: Point, direction: Direction) -> Po
 
 def calculate_points(grid: Matrix[str], is_gold: bool) -> int:
     boxes = grid.find_all_character_instances("O" if not is_gold else "[")
-    
+
     result = 0
     for box in boxes:
         result += box.y * 100 + box.x

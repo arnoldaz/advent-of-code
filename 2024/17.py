@@ -1,12 +1,14 @@
 from dataclasses import dataclass
 
+# TODO refactor
+
 @dataclass
 class Computer():
     a: int
     b: int
     c: int
     program: list[int]
-    
+
 def parse_input(lines: list[str]) -> Computer:
     a_string, b_string, c_string, _, program_string = lines
     a = int(a_string.split(":")[1].strip())
@@ -19,16 +21,16 @@ def parse_input(lines: list[str]) -> Computer:
 def get_combo(number: int, computer: Computer) -> int:
     if number >= 0 and number <= 3:
         return number
-    
+
     if number == 4:
         return computer.a
-    
+
     if number == 5:
         return computer.b
-    
+
     if number == 6:
         return computer.c
-    
+
     return -1
 
 def silver_solution(lines: list[str]) -> str:
@@ -76,7 +78,7 @@ def silver_solution(lines: list[str]) -> str:
                 combo = get_combo(computer.program[current_index + 1], computer)
                 computer.c = computer.a // (2 ** combo)
                 current_index += 2
-    
+
     print(computer)
     return ",".join(str(x) for x in result)
 
@@ -133,14 +135,14 @@ def gold_solution(lines: list[str]) -> int:
 
     ats: list[int] = []
     ats_i = -1
-    
+
     for ix, command in enumerate(reversed(computer.program)):
         print(ats_i, ats, "start")
         if ats_i == -1:
             test = 0
         else:
             test = ats[ats_i] * 8
-        
+
         print("range", test, test + 8)
 
         for i in range(test, test + 400):
@@ -153,7 +155,7 @@ def gold_solution(lines: list[str]) -> int:
                 break
         else:
             print("wtf")
-        
+
         ats_i += 1
         print(ats_i, ats)
 

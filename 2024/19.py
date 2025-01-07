@@ -5,7 +5,6 @@ def parse_input(lines: list[str]) -> tuple[list[str], list[str]]:
     return patterns, lines[2:]
 
 def find_arrangement_count(patterns: list[str], target_design: str):
-
     @cache
     def find_arrangement_count_recursive(current_design: str) -> int:
         if current_design == target_design:

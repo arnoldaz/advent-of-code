@@ -9,6 +9,7 @@ from utils.point import INVALID_POINT, Direction, Point
 
 sys.setrecursionlimit(2 ** 30)
 
+# TODO properly solve
 
 def parse_input(lines: list[str]) -> tuple[Matrix[str], Point, Point]:
     grid = Matrix[str](lines, str)

@@ -1,6 +1,9 @@
 from utils.matrix import Matrix
 from utils.point import Direction, Point
 
+# TODO
+# https://github.com/theyoprst/adventofcode/blob/main/2024/06/main.go
+
 WALL_SYMBOL = "#"
 START_SYMBOLS = {
     "^": Direction.UP,
@@ -8,7 +11,6 @@ START_SYMBOLS = {
     "v": Direction.DOWN,
     "<": Direction.LEFT,
 }
-
 
 def rotate_90_right(direction: Direction) -> Direction:
     match direction:
@@ -20,7 +22,7 @@ def rotate_90_right(direction: Direction) -> Direction:
             return Direction.LEFT
         case Direction.LEFT:
             return Direction.UP
-        
+
     return Direction.NONE
 
 def silver_solution(lines: list[str]) -> int:
@@ -28,11 +30,11 @@ def silver_solution(lines: list[str]) -> int:
 
     starting_point: Point
     starting_direction: Direction
-    wall_locations: list[Point] = []
+    wall_locations: set[Point] = set()
     for y, line in enumerate(matrix.get_data()):
         for x, char in enumerate(line):
             if char == WALL_SYMBOL:
-                wall_locations.append(Point(x, y))
+                wall_locations.add(Point(x, y))
             elif char in START_SYMBOLS.keys():
                 starting_point = Point(x, y)
                 starting_direction = START_SYMBOLS[char]
@@ -59,7 +61,7 @@ def silver_solution(lines: list[str]) -> int:
 
     return len(visited_positions)
 
-def check_loop(starting_point: Point, starting_direction: Direction, width: int, height: int, wall_locations: list[Point]) -> bool:
+def check_loop(starting_point: Point, starting_direction: Direction, width: int, height: int, wall_locations: set[Point]) -> bool:
     current_point = starting_point
     current_direction = starting_direction
 
@@ -84,17 +86,16 @@ def check_loop(starting_point: Point, starting_direction: Direction, width: int,
         repeating_positions.add((current_point, current_direction))
 
 
-# TODO: optimize, currently runs for ~30mins
 def gold_solution(lines: list[str]) -> int:
     matrix = Matrix[str](lines, str)
 
     starting_point: Point
     starting_direction: Direction
-    wall_locations: list[Point] = []
+    wall_locations: set[Point] = set()
     for y, line in enumerate(matrix.get_data()):
         for x, char in enumerate(line):
             if char == WALL_SYMBOL:
-                wall_locations.append(Point(x, y))
+                wall_locations.add(Point(x, y))
             elif char in START_SYMBOLS.keys():
                 starting_point = Point(x, y)
                 starting_direction = START_SYMBOLS[char]
@@ -119,14 +120,14 @@ def gold_solution(lines: list[str]) -> int:
 
         visited_positions.add(current_point)
 
-    print("found visited positions", len(visited_positions))
+    # print("found visited positions", len(visited_positions))
 
     id = 0
     counter = 0
     for position in visited_positions:
         id += 1
-        print(id)
-        is_loop = check_loop(starting_point, starting_direction, width, height, [*wall_locations,  position])
+        # print(id)
+        is_loop = check_loop(starting_point, starting_direction, width, height, wall_locations.union(set([position])))
         if is_loop:
             counter += 1
 

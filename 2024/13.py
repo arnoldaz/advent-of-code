@@ -4,6 +4,8 @@ import sympy as sp
 from sympy.solvers import solve
 from sympy import Symbol
 
+# TODO
+
 class Equation(NamedTuple):
     a_x: int
     a_y: int
@@ -30,7 +32,16 @@ def parse_input(lines: list[str], gold=False) -> list[Equation]:
         b_x, b_y = int(button_b_match.group(1)), int(button_b_match.group(2))
         result_x, result_y = int(prize_match.group(1)), int(prize_match.group(2))
 
-        equations.append(Equation(a_x, a_y, b_x, b_y, result_x if not gold else result_x + 10000000000000, result_y if not gold else result_y + 10000000000000))
+        equations.append(
+            Equation(
+                a_x,
+                a_y,
+                b_x,
+                b_y,
+                result_x if not gold else result_x + 10000000000000,
+                result_y if not gold else result_y + 10000000000000,
+            )
+        )
 
         i += 4
 

@@ -1,33 +1,29 @@
+import sys
 from collections import deque
-from utils.point import INVALID_POINT, Direction, Point
 
-GRID_SIZE = 70
+from utils.point2d import Point2d
 
-def parse_input(lines: list[str]) -> list[Point]:
-    points: list[Point] = []
-    for line in lines:
-        x, y = line.split(",")
-        points.append(Point(int(x), int(y)))
+def parse_input(lines: list[str]) -> list[Point2d]:
+    return [Point2d(int(x), int(y)) for line in lines for x, y in [line.split(",")]]
 
-    return points
+def get_path_bfs(start: Point2d, end: Point2d, walls: set[Point2d], width: int, height: int):
+    visited: dict[Point2d, Point2d] = {}
+    queue = deque[Point2d]()
+    path: list[Point2d] = []
+    invalid_point = Point2d(sys.maxsize, sys.maxsize)
 
-def get_path_bfs(start: Point, end: Point, walls: set[Point], width: int, height: int):
-    visited: dict[Point, Point] = {}
-    queue = deque[Point]()
-    path: list[Point] = []
-
-    visited[start] = INVALID_POINT
+    visited[start] = invalid_point
     queue.append(start)
 
     while queue:
-        current = queue.popleft() 
+        current = queue.popleft()
         if current == end:
-            while current != INVALID_POINT:
+            while current != invalid_point:
                 path.append(current)
                 current = visited[current]
             return path[::-1]
-        for neighbor in [current + direction for direction in Direction.valid_directions()]:
-            if neighbor not in visited and neighbor not in walls and neighbor.in_bounds_2d(width, height):
+        for neighbor in current.get_neighbors(width, height):
+            if neighbor not in visited and neighbor not in walls:
                 visited[neighbor] = current
                 queue.append(neighbor)
 
@@ -35,17 +31,25 @@ def get_path_bfs(start: Point, end: Point, walls: set[Point], width: int, height
 
 def silver_solution(lines: list[str]) -> int:
     walls = parse_input(lines)
-    WALL_AMOUNT = 1024
+    grid_size = 70
+    fallen_walls = 1024
 
-    path = get_path_bfs(Point(0, 0), Point(GRID_SIZE, GRID_SIZE), set(walls[:WALL_AMOUNT]), GRID_SIZE + 1, GRID_SIZE + 1)
+    path = get_path_bfs(
+        Point2d(0, 0),
+        Point2d(grid_size, grid_size),
+        set(walls[:fallen_walls]),
+        grid_size + 1,
+        grid_size + 1,
+    )
 
     return len(path) - 1
 
 def gold_solution(lines: list[str]) -> str:
     points = parse_input(lines)
+    grid_size = 70
 
-    start = Point(0, 0)
-    end = Point(GRID_SIZE, GRID_SIZE)
+    start = Point2d(0, 0)
+    end = Point2d(grid_size, grid_size)
 
     low = 0
     mid = 0
@@ -53,7 +57,7 @@ def gold_solution(lines: list[str]) -> str:
 
     while low <= high:
         mid = (high + low) // 2
-        path = get_path_bfs(start, end, set(points[:mid+1]), GRID_SIZE + 1, GRID_SIZE + 1)
+        path = get_path_bfs(start, end, set(points[:mid+1]), grid_size + 1, grid_size + 1)
 
         if len(path) > 0:
             low = mid + 1

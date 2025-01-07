@@ -7,7 +7,7 @@ def blink_number_recursive(number: int, depth: int, required_depth: int) -> int:
 
     if number == 0:
         return blink_number_recursive(1, depth + 1, required_depth)
-    
+
     digits = str(number)
     digit_count = len(digits)
     if digit_count % 2 == 0:
@@ -19,11 +19,8 @@ def blink_number_recursive(number: int, depth: int, required_depth: int) -> int:
 
 def silver_solution(lines: list[str]) -> int:
     numbers = [int(char) for char in lines[0].split()]
-
     return sum(blink_number_recursive(number, 0, 25) for number in numbers)
-
 
 def gold_solution(lines: list[str]) -> int:
     numbers = [int(char) for char in lines[0].split()]
-
     return sum(blink_number_recursive(number, 0, 75) for number in numbers)

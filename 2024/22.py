@@ -46,6 +46,7 @@ def silver_solution(lines: list[str]) -> int:
         for _ in range(2000):
             number = next_secret_number(number)
         result += number
+
     return result
 
 def gold_solution(lines: list[str]) -> int:

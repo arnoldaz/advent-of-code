@@ -164,3 +164,16 @@ class Direction2d(Enum):
                 return Direction2d.UP_RIGHT
             case _:
                 raise RuntimeError(f"Direction2d '{self}' is not reversable")
+
+    def turn_right(self) -> "Direction2d":
+        match self:
+            case Direction2d.UP:
+                return Direction2d.RIGHT
+            case Direction2d.RIGHT:
+                return Direction2d.DOWN
+            case Direction2d.DOWN:
+                return Direction2d.LEFT
+            case Direction2d.LEFT:
+                return Direction2d.UP
+            case _:
+                raise RuntimeError(f"Direction2d '{self}' turn right is not supported")

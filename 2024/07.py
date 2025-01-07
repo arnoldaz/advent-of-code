@@ -3,6 +3,8 @@ from functools import cache
 from typing import NamedTuple
 from itertools import combinations, product, permutations
 
+# TODO
+
 class Equation(NamedTuple):
     result: int
     numbers: tuple[int, ...]
@@ -83,7 +85,6 @@ def is_equation_possible(equation: Equation):
 
     return False
 
-# @cache
 def dfs(current_result: int, equation: Equation, depth: int):
     # print("   " * depth, current_result, depth)
     if current_result == equation.result and len(equation.numbers) == depth:

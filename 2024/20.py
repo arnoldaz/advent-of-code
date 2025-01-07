@@ -2,6 +2,8 @@ import queue
 from utils.matrix import Matrix
 from utils.point import INVALID_POINT, Point
 
+# TODO refactor to new grid and point2d
+
 def parse_input(lines: list[str]) -> tuple[Matrix[str], Point, Point]:
     grid = Matrix[str](lines, str)
     start = grid.find_first_character_instance("S")
@@ -65,11 +67,11 @@ def get_cheat_enough_saved_counter(cost_map: dict[Point, int], max_distance: int
     return counter
 
 def silver_solution(lines: list[str]) -> int:
-    grid, start, end = parse_input(lines)   
+    grid, start, end = parse_input(lines)
     cost_map = djikstra_search(grid, start, end)
     return get_cheat_enough_saved_counter(cost_map, 2, 100)
 
 def gold_solution(lines: list[str]) -> int:
-    grid, start, end = parse_input(lines)   
+    grid, start, end = parse_input(lines)
     cost_map = djikstra_search(grid, start, end)
     return get_cheat_enough_saved_counter(cost_map, 20, 100)
