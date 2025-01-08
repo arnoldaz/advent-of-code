@@ -82,6 +82,9 @@ class Point2d:
             if (neighbor := self + direction).in_bounds(width, height)
         ]
 
+    @staticmethod
+    def manhattan_distance(point1: "Point2d", point2: "Point2d") -> int:
+        return abs(point1.x - point2.x) + abs(point1.y - point2.y)
 
 class Direction2d(Enum):
     NONE = Point2d(0, 0)

@@ -160,7 +160,6 @@ def validate_solutions(year: int, days: int | tuple[int, int], answers: dict[str
 
         print(split_line)
 
-
 def main():
     args = parse_arguments()
     load_dotenv()

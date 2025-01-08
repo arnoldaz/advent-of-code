@@ -34,7 +34,6 @@ class Matrix[T]:
     def set_symbol(self, position: Point, symbol: T):
         self._data[position.y][position.x] = symbol
 
-    # TODO: make it the main one
     def set_symbol_2d(self, position: Point2d, symbol: T):
         self._data[position.y][position.x] = symbol
 

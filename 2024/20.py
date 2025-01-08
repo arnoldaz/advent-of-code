@@ -1,23 +1,23 @@
 import queue
-from utils.matrix import Matrix
-from utils.point import INVALID_POINT, Point
+import sys
 
-# TODO refactor to new grid and point2d
+from utils.grid import Grid
+from utils.point2d import Point2d
 
-def parse_input(lines: list[str]) -> tuple[Matrix[str], Point, Point]:
-    grid = Matrix[str](lines, str)
+def parse_input(lines: list[str]) -> tuple[Grid[str], Point2d, Point2d]:
+    grid = Grid[str](lines)
     start = grid.find_first_character_instance("S")
     end = grid.find_first_character_instance("E")
 
     return grid, start, end
 
-def djikstra_search(grid: Matrix[str], start: Point, end: Point) -> dict[Point, int]:
-    frontier = queue.Queue[Point]()
-    came_from: dict[Point, Point] = {}
-    cost_so_far: dict[Point, int] = {}
+def djikstra_search(grid: Grid[str], start: Point2d, end: Point2d) -> dict[Point2d, int]:
+    frontier = queue.Queue[Point2d]()
+    came_from: dict[Point2d, Point2d] = {}
+    cost_so_far: dict[Point2d, int] = {}
 
     frontier.put(start)
-    came_from[start] = INVALID_POINT
+    came_from[start] = Point2d(sys.maxsize, sys.maxsize)
     cost_so_far[start] = 0
 
     while not frontier.empty():
@@ -25,7 +25,7 @@ def djikstra_search(grid: Matrix[str], start: Point, end: Point) -> dict[Point, 
         if current == end:
             break
 
-        for (neighbor, _) in grid.get_neighbors(current):
+        for neighbor in grid.get_neighbors(current):
             if grid.get_symbol(neighbor) == "#":
                 continue
 
@@ -37,32 +37,22 @@ def djikstra_search(grid: Matrix[str], start: Point, end: Point) -> dict[Point, 
 
     return cost_so_far
 
-def grid_distance(point1: Point, point2: Point):
-    return abs(point1.x - point2.x) + abs(point1.y - point2.y)
-
-def get_cheat_enough_saved_counter(cost_map: dict[Point, int], max_distance: int, minimum_saved: int):
+def get_cheat_enough_saved_counter(cost_map: dict[Point2d, int], max_distance: int, minimum_saved: int):
     path = cost_map.keys()
     counter = 0
 
     for point in path:
         for y in range(-max_distance, max_distance + 1):
             for x in range(-max_distance, max_distance + 1):
-                possible_path = point + Point(x, y)
+                possible_path = point + Point2d(x, y)
                 if possible_path not in cost_map or point == possible_path:
                     continue
 
-                distance = grid_distance(point, possible_path)
+                distance = Point2d.manhattan_distance(point, possible_path)
                 if distance <= max_distance:
                     saved_amount = cost_map[possible_path] - cost_map[point] - distance
                     if saved_amount >= minimum_saved:
                         counter += 1
-
-        # for other_point in path:
-        #     distance = grid_distance(point, other_point)
-        #     if distance <= max_distance:
-        #         saved_amount = cost_map[other_point] - cost_map[point] - distance
-        #         if saved_amount >= minimum_saved:
-        #             counter += 1
 
     return counter
 
