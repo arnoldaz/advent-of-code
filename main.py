@@ -133,7 +133,7 @@ def validate_solutions(year: int, days: int | tuple[int, int], answers: dict[str
     else:
         first_day, last_day = days
 
-    split_line = f"{"-" * 43}+{"-" * 27}"
+    split_line = f"{"-" * 71}"
 
     print(split_line)
 
@@ -150,15 +150,16 @@ def validate_solutions(year: int, days: int | tuple[int, int], answers: dict[str
         if silver_answer == cached_silver_answer:
             print(f"[Day {day:0>2} silver answer] {Fore.GREEN}{silver_answer}{Fore.RESET}")
         else:
-            print(f"[Day {day:0>2} silver answer] {Fore.RED}ERROR:{Fore.RESET} Expected {Fore.BLUE}{cached_silver_answer}{Fore.RESET}, Actual {Fore.RED}{silver_answer}{Fore.RESET}")
+            print(f"[Day {day:0>2} silver answer] {Fore.RED}ERROR:{Fore.RESET} Expected {Fore.YELLOW}{cached_silver_answer}{Fore.RESET}, Actual {Fore.RED}{silver_answer}{Fore.RESET}")
 
         cached_gold_answer = cached_answers["gold"]
         if gold_answer == cached_gold_answer:
             print(f"[Day {day:0>2}   gold answer] {Fore.GREEN}{gold_answer}{Fore.RESET}")
         else:
-            print(f"[Day {day:0>2}   gold answer] {Fore.RED}ERROR:{Fore.RESET} Expected {Fore.BLUE}{cached_gold_answer}{Fore.RESET}, Actual {Fore.RED}{gold_answer}{Fore.RESET}")
+            print(f"[Day {day:0>2}   gold answer] {Fore.RED}ERROR:{Fore.RESET} Expected {Fore.GREEN}{cached_gold_answer}{Fore.RESET}, Actual {Fore.RED}{gold_answer}{Fore.RESET}")
 
-    print(split_line)
+        print(split_line)
+
 
 def main():
     args = parse_arguments()

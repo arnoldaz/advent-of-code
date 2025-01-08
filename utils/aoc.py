@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 import requests
 
-HEADERS = { "User-Agent": "Personal AoC solutions by ArnoldaZ (github.com/arnoldaz/advent-of-code) (testing some automation for a bit)" }
+HEADERS = { "User-Agent": "Personal AoC solutions by ArnoldaZ (github.com/arnoldaz/advent-of-code)" }
 INPUT_URL = "https://adventofcode.com/{year}/day/{day}/input"
 PUZZLE_URL = "https://adventofcode.com/{year}/day/{day}"
 TEMPLATE_FILE_PATH = "solution_template.py"
