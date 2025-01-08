@@ -156,7 +156,7 @@ def validate_solutions(year: int, days: int | tuple[int, int], answers: dict[str
         if gold_answer == cached_gold_answer:
             print(f"[Day {day:0>2}   gold answer] {Fore.GREEN}{gold_answer}{Fore.RESET}")
         else:
-            print(f"[Day {day:0>2}   gold answer] {Fore.RED}ERROR:{Fore.RESET} Expected {Fore.GREEN}{cached_gold_answer}{Fore.RESET}, Actual {Fore.RED}{gold_answer}{Fore.RESET}")
+            print(f"[Day {day:0>2}   gold answer] {Fore.RED}ERROR:{Fore.RESET} Expected {Fore.YELLOW}{cached_gold_answer}{Fore.RESET}, Actual {Fore.RED}{gold_answer}{Fore.RESET}")
 
         print(split_line)
 
