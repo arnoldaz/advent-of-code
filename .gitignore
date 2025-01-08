@@ -4,6 +4,9 @@ input/
 # Temporary helper files
 temp/
 
+# Downloaded and cached puzzle answer files
+answers/
+
 # Environment file with private cookies and tokens
 .env
 

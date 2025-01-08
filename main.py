@@ -6,7 +6,7 @@ from types import ModuleType
 from typing import Callable, NamedTuple
 from dotenv import load_dotenv
 from colorama import Fore
-from utils.aoc import copy_template_file, get_solution_module_path, read_input_file, read_test_input
+from utils.aoc import copy_template_file, download_answers_file, get_solution_module_path, read_input_file, read_test_input
 
 class ProgramArguments(NamedTuple):
     year: int
@@ -15,6 +15,7 @@ class ProgramArguments(NamedTuple):
     gold: bool
     test: bool
     add_template: bool
+    validate: bool
 
 def parse_arguments() -> ProgramArguments:
     parser = argparse.ArgumentParser(prog="Advent of Code runner", description="Runs Advent of Code solutions.")
@@ -24,6 +25,7 @@ def parse_arguments() -> ProgramArguments:
     parser.add_argument("-g", "--gold", action="store_true", help="only run gold solution")
     parser.add_argument("-t", "--test", action="store_true", help="run with test input")
     parser.add_argument("-a", "--add-template", action="store_true", help="add template solution module")
+    parser.add_argument("-v", "--validate", action="store_true", help="validate solution answers based on displayed results on puzzle page")
     args = parser.parse_args()
 
     if not 2015 <= args.year <= 2025:
@@ -50,7 +52,7 @@ def parse_arguments() -> ProgramArguments:
 
         day = args.day
 
-    return ProgramArguments(args.year, day, args.silver, args.gold, args.test, args.add_template)
+    return ProgramArguments(args.year, day, args.silver, args.gold, args.test, args.add_template, args.validate)
 
 def timed_solution(function: Callable[[list[str]], int | str], function_params: list[str]) -> tuple[int | str, int]:
     start_time = time.perf_counter_ns()
@@ -125,9 +127,47 @@ def run_all_solutions(year: int, day_range: tuple[int, int]):
     print(f"[Total times] Silver: {(format_nanoseconds_string(total_silver_time)):>30} | Gold: {(format_nanoseconds_string(total_gold_time)):>30}")
     print(split_line)
 
+def validate_solutions(year: int, days: int | tuple[int, int], answers: dict[str, dict[str, int | str]]):
+    if isinstance(days, int):
+        first_day, last_day = days, days
+    else:
+        first_day, last_day = days
+
+    split_line = f"{"-" * 43}+{"-" * 27}"
+
+    print(split_line)
+
+    for day in range(first_day, last_day + 1):
+        module = load_module(year, day)
+        input_data = read_input_file(year, day)
+
+        silver_answer: int | str = module.silver_solution(input_data)
+        gold_answer: int | str = module.gold_solution(input_data)
+
+        cached_answers = answers[str(day)]
+
+        cached_silver_answer = cached_answers["silver"]
+        if silver_answer == cached_silver_answer:
+            print(f"[Day {day:0>2} silver answer] {Fore.GREEN}{silver_answer}{Fore.RESET}")
+        else:
+            print(f"[Day {day:0>2} silver answer] {Fore.RED}ERROR:{Fore.RESET} Expected {Fore.BLUE}{cached_silver_answer}{Fore.RESET}, Actual {Fore.RED}{silver_answer}{Fore.RESET}")
+
+        cached_gold_answer = cached_answers["gold"]
+        if gold_answer == cached_gold_answer:
+            print(f"[Day {day:0>2}   gold answer] {Fore.GREEN}{gold_answer}{Fore.RESET}")
+        else:
+            print(f"[Day {day:0>2}   gold answer] {Fore.RED}ERROR:{Fore.RESET} Expected {Fore.BLUE}{cached_gold_answer}{Fore.RESET}, Actual {Fore.RED}{gold_answer}{Fore.RESET}")
+
+    print(split_line)
+
 def main():
     args = parse_arguments()
     load_dotenv()
+
+    if args.validate:
+        answers = download_answers_file(args.year, args.day)
+        validate_solutions(args.year, args.day, answers)
+        return
 
     if not isinstance(args.day, int):
         run_all_solutions(args.year, args.day)
