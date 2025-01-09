@@ -82,6 +82,12 @@ class Point2d:
             if (neighbor := self + direction).in_bounds(width, height)
         ]
 
+    def get_neighbors_no_bounds(self, include_diagonal: bool = False, exclude_orthogonal: bool = False) -> list["Point2d"]:
+        return [
+            self + direction
+            for direction in Direction2d.get_all_directions(include_diagonal, exclude_orthogonal)
+        ]
+
     @staticmethod
     def manhattan_distance(point1: "Point2d", point2: "Point2d") -> int:
         return abs(point1.x - point2.x) + abs(point1.y - point2.y)
