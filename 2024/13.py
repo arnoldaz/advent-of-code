@@ -1,89 +1,59 @@
-import re
+from itertools import groupby
 from typing import NamedTuple
-import sympy as sp
-from sympy.solvers import solve
-from sympy import Symbol
 
-# TODO
+from utils.string import get_ints
 
 class Equation(NamedTuple):
-    a_x: int
-    a_y: int
-    b_x: int
-    b_y: int
-    result_x: int
-    result_y: int
+    a1: int
+    a2: int
+    b1: int
+    b2: int
+    c1: int
+    c2: int
+
+    def solve(self) -> tuple[int, int]:
+        # Solving using Cramer's Rule
+        det_a = self.a1 * self.b2 - self.b1 * self.a2
+        det_ax = self.c1 * self.b2 - self.b1 * self.c2
+        det_ay = self.a1 * self.c2 - self.c1 * self.a2
+
+        x, rem_x = divmod(det_ax, det_a)
+        y, rem_y = divmod(det_ay, det_a)
+
+        return (x, y) if rem_x == 0 and rem_y == 0 else (-1, -1)
 
 def parse_input(lines: list[str], gold=False) -> list[Equation]:
-    button_a_regex = r"Button A: X\+(\d+), Y\+(\d+)"
-    button_b_regex = r"Button B: X\+(\d+), Y\+(\d+)"
-    prize_regex = r"Prize: X=(\d+), Y=(\d+)"
-
     equations: list[Equation] = []
+    machines = [
+        [tuple[int, int](get_ints(line)) for line in group]
+        for key, group in groupby(lines, key=bool)
+        if key
+    ]
 
-    i = 0
-    while i < len(lines) + 1:
-        button_a_match = re.match(button_a_regex, lines[i])
-        button_b_match = re.match(button_b_regex, lines[i+1])
-        prize_match = re.match(prize_regex, lines[i+2])
-        assert button_a_match and button_b_match and prize_match, "Regex match should always find data"
-
-        a_x, a_y = int(button_a_match.group(1)), int(button_a_match.group(2))
-        b_x, b_y = int(button_b_match.group(1)), int(button_b_match.group(2))
-        result_x, result_y = int(prize_match.group(1)), int(prize_match.group(2))
-
-        equations.append(
-            Equation(
-                a_x,
-                a_y,
-                b_x,
-                b_y,
-                result_x if not gold else result_x + 10000000000000,
-                result_y if not gold else result_y + 10000000000000,
-            )
-        )
-
-        i += 4
+    for button_a, button_b, prize in machines:
+        (a1, a2), (b1, b2), (c1, c2) = button_a, button_b, prize
+        equations.append(Equation(a1, a2, b1, b2, c1 + 10000000000000 if gold else c1, c2 + 10000000000000 if gold else c2))
 
     return equations
-
 
 def silver_solution(lines: list[str]) -> int:
     equations = parse_input(lines)
 
     result = 0
-
     for equation in equations:
-        x = Symbol("x", integer=True)
-        y = Symbol("y", integer=True)
-        eq1 = sp.Eq(equation.a_x * x + equation.b_x * y, equation.result_x) # type: ignore reportOperatorIssue
-        eq2 = sp.Eq(equation.a_y * x + equation.b_y * y, equation.result_y) # type: ignore reportOperatorIssue
-        output = solve([ eq1, eq2 ])
+        x, y = equation.solve()
+        if x > 0 and y > 0:
+            result += x * 3 + y
 
-        if not isinstance(output, list):
-            x_value = output.get(x)
-            y_value = output.get(y)
-            # print(x_value, y_value)
-            result += int(x_value) * 3 + int(y_value)
-        
     return result
 
 def gold_solution(lines: list[str]) -> int:
     equations = parse_input(lines, True)
 
     result = 0
-
     for equation in equations:
-        x = Symbol("x", integer=True)
-        y = Symbol("y", integer=True)
-        eq1 = sp.Eq(equation.a_x * x + equation.b_x * y, equation.result_x) # type: ignore reportOperatorIssue
-        eq2 = sp.Eq(equation.a_y * x + equation.b_y * y, equation.result_y) # type: ignore reportOperatorIssue
-        output = solve([ eq1, eq2 ])
+        x, y = equation.solve()
+        if x > 0 and y > 0:
+            result += x * 3 + y
 
-        if not isinstance(output, list):
-            x_value = output.get(x)
-            y_value = output.get(y)
-            # print(x_value, y_value)
-            result += int(x_value) * 3 + int(y_value)
-        
     return result
