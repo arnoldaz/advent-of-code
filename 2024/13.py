@@ -22,7 +22,7 @@ class Equation(NamedTuple):
 
         return (x, y) if rem_x == 0 and rem_y == 0 else (-1, -1)
 
-def parse_input(lines: list[str], gold=False) -> list[Equation]:
+def parse_input(lines: list[str], is_gold: bool) -> list[Equation]:
     equations: list[Equation] = []
     machines = [
         [tuple[int, int](get_ints(line)) for line in group]
@@ -32,28 +32,14 @@ def parse_input(lines: list[str], gold=False) -> list[Equation]:
 
     for button_a, button_b, prize in machines:
         (a1, a2), (b1, b2), (c1, c2) = button_a, button_b, prize
-        equations.append(Equation(a1, a2, b1, b2, c1 + 10000000000000 if gold else c1, c2 + 10000000000000 if gold else c2))
+        equations.append(Equation(a1, a2, b1, b2, c1 + 10000000000000 if is_gold else c1, c2 + 10000000000000 if is_gold else c2))
 
     return equations
 
 def silver_solution(lines: list[str]) -> int:
-    equations = parse_input(lines)
-
-    result = 0
-    for equation in equations:
-        x, y = equation.solve()
-        if x > 0 and y > 0:
-            result += x * 3 + y
-
-    return result
+    equations = parse_input(lines, False)
+    return sum(x * 3 + y for x, y in (equation.solve() for equation in equations) if x > 0 and y > 0)
 
 def gold_solution(lines: list[str]) -> int:
     equations = parse_input(lines, True)
-
-    result = 0
-    for equation in equations:
-        x, y = equation.solve()
-        if x > 0 and y > 0:
-            result += x * 3 + y
-
-    return result
+    return sum(x * 3 + y for x, y in (equation.solve() for equation in equations) if x > 0 and y > 0)
