@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import NamedTuple
 
-# TODO
-
 class Operation(Enum):
     AND = 1
     OR = 2
@@ -15,35 +13,34 @@ class Instruction(NamedTuple):
     destination: str
 
 def parse_input(lines: list[str]):
+    empty_line = lines.index("")
+
+    wire_values = {
+        wire: int(value)
+        for line in lines[:empty_line]
+        for wire, value in [line.split(": ")]
+    }
+
     instructions: list[Instruction] = []
-    wire_values: dict[str, int] = {}
-
-    is_initial_data = True
-    for line in lines:
-        if not line:
-            is_initial_data = False
-            continue
-
-        if is_initial_data:
-            wire, value = line.split(": ")
-            wire_values[wire] = int(value)
+    for line in lines[empty_line+1:]:
+        data, destination = line.split(" -> ")
+        if "AND" in data:
+            operation = Operation.AND
+            left, right = data.split(" AND ")
+        elif "XOR" in data:
+            operation = Operation.XOR
+            left, right = data.split(" XOR ")
+        elif "OR" in data:
+            operation = Operation.OR
+            left, right = data.split(" OR ")
         else:
-            data, destination = line.split(" -> ")
-            if "AND" in data:
-                operation = Operation.AND
-                left, right = data.split(" AND ")
-            elif "XOR" in data:
-                operation = Operation.XOR
-                left, right = data.split(" XOR ")
-            elif "OR" in data:
-                operation = Operation.OR
-                left, right = data.split(" OR ")
+            raise ValueError("Impossible inputs")
 
-            instructions.append(Instruction(operation, left, right, destination))
+        instructions.append(Instruction(operation, left, right, destination))
 
     return instructions, wire_values
 
-def get_instructions_result(instructions: list[Instruction], initial_wire_values: dict[str, int]):
+def get_instructions_result(instructions: list[Instruction], initial_wire_values: dict[str, int]) -> int:
     wire_values = initial_wire_values.copy()
     calculated_values = { *wire_values.keys() }
     final_count = len(instructions) + len(calculated_values)
@@ -143,27 +140,8 @@ def silver_solution(lines: list[str]) -> int:
     return get_instructions_result(instructions, wire_values)
 
 def gold_solution(lines: list[str]) -> str:
-    instructions, wire_values = parse_input(lines)
-
-    generate_neato_dot_file(instructions)
-
-    # x_result, y_result = 0, 0
-    # for key, value in wire_values.items():
-    #     if key.startswith("x"):
-    #         number = int(key.removeprefix("x"))
-    #         x_result += (2 ** number) * value
-    #     elif key.startswith("y"):
-    #         number = int(key.removeprefix("y"))
-    #         y_result += (2 ** number) * value
-
-    # expected_result = x_result + y_result
-
-    # print(x_result, y_result, "=", expected_result)
-    # print("", bin(x_result))
-    # print("", bin(y_result))
-    # print("=")
-    # print(bin(expected_result), "good")
-    # print(bin(get_instructions_result(instructions, wire_values)), "current")
+    _instructions, _wire_values = parse_input(lines)
+    # generate_neato_dot_file(instructions)
 
     # Found visually from generated graph
     swaps = ["z06", "fkp", "z31", "mfm", "z11", "ngr", "bpt", "krj"]

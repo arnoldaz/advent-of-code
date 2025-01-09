@@ -5,7 +5,7 @@ def parse_input(lines: list[str]) -> tuple[list[tuple[int, int]], list[list[int]
         for line in lines[:empty_line]
         for left, right in [line.split("|")]
     ]
-    orders = [[int(x) for x in line.split(",")] for line in lines[empty_line + 1 :]]
+    orders = [[int(x) for x in line.split(",")] for line in lines[empty_line+1:]]
 
     return ordering_rules, orders
 
