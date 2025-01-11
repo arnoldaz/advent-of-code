@@ -18,20 +18,8 @@ def parse_input(lines: list[str]) -> list[Robot]:
 def move_robots(robots: list[Robot], width: int, height: int, time: int):
     for _ in range(time):
         for robot in robots:
-            new_position = robot.position + robot.velocity
-            x, y = new_position.x, new_position.y
-
-            if x < 0:
-                x += width
-            elif x >= width:
-                x -= width
-
-            if y < 0:
-                y += height
-            elif y >= height:
-                y -= height
-
-            robot.position = Point2d(x, y)
+            robot.position.x = (robot.position.x + robot.velocity.x) % width
+            robot.position.y = (robot.position.y + robot.velocity.y) % height
 
 def find_easter_egg(robots: list[Robot]) -> bool:
     robot_positions = set(robot.position for robot in robots)
