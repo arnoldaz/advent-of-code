@@ -153,6 +153,21 @@ class Direction2d(Enum):
             case _:
                 raise RuntimeError(f"Character '{char}' is not convertable to Direction2d")
 
+    def to_character(self) -> str:
+        match self:
+            case Direction2d.UP:
+                return "U"
+            case Direction2d.RIGHT:
+                return "R"
+            case Direction2d.DOWN:
+                return "D"
+            case Direction2d.LEFT:
+                return "L"
+            case Direction2d.NONE:
+                return "N"
+            case _:
+                raise RuntimeError(f"Direction2d '{self}' is not convertable to character")
+
     def reverse(self) -> "Direction2d":
         match self:
             case Direction2d.UP:
