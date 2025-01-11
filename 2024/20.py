@@ -38,21 +38,21 @@ def djikstra_search(grid: Grid[str], start: Point2d, end: Point2d) -> dict[Point
     return cost_so_far
 
 def get_cheat_enough_saved_counter(cost_map: dict[Point2d, int], max_distance: int, minimum_saved: int):
-    path = cost_map.keys()
     counter = 0
 
-    for point in path:
-        for y in range(-max_distance, max_distance + 1):
-            for x in range(-max_distance, max_distance + 1):
-                possible_path = point + Point2d(x, y)
-                if possible_path not in cost_map or point == possible_path:
-                    continue
+    possible_coordinates: list[tuple[Point2d, int]] = []
+    for y in range(-max_distance, max_distance + 1):
+        for x in range(-max_distance, max_distance + 1):
+            distance = abs(x) + abs(y)
+            if distance <= max_distance:
+                possible_coordinates.append((Point2d(x, y), distance))
 
-                distance = Point2d.manhattan_distance(point, possible_path)
-                if distance <= max_distance:
-                    saved_amount = cost_map[possible_path] - cost_map[point] - distance
-                    if saved_amount >= minimum_saved:
-                        counter += 1
+    for point in cost_map.keys():
+        point_cost = cost_map[point]
+        for coord, distance in possible_coordinates:
+            if (path := point + coord) in cost_map:
+                if cost_map[path] - point_cost - distance >= minimum_saved:
+                    counter += 1
 
     return counter
 
