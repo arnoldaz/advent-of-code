@@ -1,77 +1,32 @@
+import re
 
 def parse_input(lines: list[str]) -> list[tuple[int, int]]:
     line = "".join(lines)
-    result: list[tuple[int, int]] = []
-    
-    ranges = line.split(",")
-    for range in ranges:
-        left, right = range.split("-")
-        result.append((int(left), int(right)))
+    ranges: list[tuple[int, int]] = []
 
-    return result
+    for range in line.split(","):
+        start, end = range.split("-")
+        ranges.append((int(start), int(end)))
 
-def check_repeating(digits: list[int], amount: int, limit_twice: bool) -> bool:
-    split_lists: list[list[int]] = []
+    return ranges
 
-    i = 0
-    while i < len(digits):
-        new_list: list[int] = []
-        for _ in range(amount):
-            if i == len(digits):
-                break
-            new_list.append(digits[i])
-            i += 1
-        split_lists.append(new_list)
+def find_invalid_sum(ranges: list[tuple[int, int]], allow_multiple_repeats: bool) -> int:
+    invalid_number_regex = r"^([0-9]+)\1+$" if allow_multiple_repeats else r"^([0-9]+)\1$"
+    answer = 0
 
-    if limit_twice and len(split_lists) > 2:
-        return False
+    for start, end in ranges:
+        for number in range(start, end + 1):
+            matches = re.match(invalid_number_regex, str(number))
+            if matches is not None:
+                answer += number
 
-    for split_list in split_lists:
-        if split_list != split_lists[0]:
-            return False
+    return answer
 
-    return True
-
-def silver_solution(lines: list[str]) -> int: # runs for ~6s
+def silver_solution(lines: list[str]) -> int:
     ranges = parse_input(lines)
-    result = 0
+    return find_invalid_sum(ranges, False)
 
-    for left, right in ranges:
-        for i in range(left, right + 1):
-            digits = [int(digit) for digit in str(i)]
-            # print(left, "-", right, "->", digits)
-            repeating = False
-            
-            for amount in range(1, len(digits) // 2 + 1):
-                # print(amount)
-                is_repeating = check_repeating(digits, amount, True)
-                if is_repeating:
-                    repeating = True
-                    break
-            
-            if repeating:
-                result += i
 
-    return result
-
-def gold_solution(lines: list[str]) -> int: # runs for ~6s
+def gold_solution(lines: list[str]) -> int:
     ranges = parse_input(lines)
-    result = 0
-
-    for left, right in ranges:
-        for i in range(left, right + 1):
-            digits = [int(digit) for digit in str(i)]
-            # print(left, "-", right, "->", digits)
-            repeating = False
-            
-            for amount in range(1, len(digits) // 2 + 1):
-                # print(amount)
-                is_repeating = check_repeating(digits, amount, False)
-                if is_repeating:
-                    repeating = True
-                    break
-            
-            if repeating:
-                result += i
-
-    return result
+    return find_invalid_sum(ranges, True)
