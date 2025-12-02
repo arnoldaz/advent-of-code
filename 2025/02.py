@@ -26,7 +26,6 @@ def silver_solution(lines: list[str]) -> int:
     ranges = parse_input(lines)
     return find_invalid_sum(ranges, False)
 
-
 def gold_solution(lines: list[str]) -> int:
     ranges = parse_input(lines)
     return find_invalid_sum(ranges, True)
