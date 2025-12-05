@@ -11,8 +11,17 @@ class Range:
         self.start = start
         self.end = end
 
+    def __str__(self) -> str:
+        return f"[{self.start}; {self.end}]"
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
     def copy(self) -> "Range":
         return Range(self.start, self.end)
+
+    def count(self) -> int:
+        return self.end - self.start + 1
 
     def find_overlap(self, other_range: "Range") -> Optional["Range"]:
         start = max(self.start, other_range.start)
