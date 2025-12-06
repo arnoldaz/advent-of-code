@@ -1,4 +1,5 @@
 from collections.abc import Iterator
+from itertools import zip_longest
 from typing import Optional
 from utils.point2d import Point2d, Direction2d
 
@@ -73,10 +74,14 @@ class Grid[T]:
     def get_column(self, column_index: int) -> list[T]:
         return [row[column_index] for row in self._data]
 
+    def get_columns(self, fill_value: T) -> list[list[T]]:
+        return [list(column) for column in zip_longest(*self._data, fillvalue=fill_value)]
+
     def copy(self) -> "Grid[T]":
         return Grid([list(row) for row in self._data])
 
     def rotate_clockwise(self):
+        # TODO: check whether this should change to zip_longest
         self._data = [list(row) for row in zip(*reversed(self._data))]
 
     def print(self, single_symbol_space: int = 1):
@@ -103,3 +108,4 @@ class Grid[T]:
         for y in range(height):
             for x in range(width):
                 yield (Point2d(x, y), lines[y][x])
+
