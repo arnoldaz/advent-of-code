@@ -4,8 +4,8 @@ def parse_input(lines: list[str]) -> list[tuple[int, int]]:
     line = "".join(lines)
     ranges: list[tuple[int, int]] = []
 
-    for range in line.split(","):
-        start, end = range.split("-")
+    for number_range in line.split(","):
+        start, end = number_range.split("-")
         ranges.append((int(start), int(end)))
 
     return ranges

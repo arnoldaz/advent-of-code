@@ -18,7 +18,7 @@ def silver_solution(lines: list[str]) -> int:
             current += movement
             while current > 99:
                 current -= 100
-        
+
         if current == 0:
             result += 1
 

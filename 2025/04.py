@@ -3,9 +3,7 @@ from utils.point2d import Point2d
 
 def silver_solution(lines: list[str]) -> int:
     grid = Grid[str](lines)
-    
     rolls = set(grid.find_all_character_instances("@"))
-
     answer = 0
 
     for roll in rolls:
@@ -21,7 +19,6 @@ def silver_solution(lines: list[str]) -> int:
 
 def gold_solution(lines: list[str]) -> int:
     grid = Grid[str](lines)
-
     answer = 0
 
     while True:
@@ -42,5 +39,5 @@ def gold_solution(lines: list[str]) -> int:
         answer += len(to_remove)
         for x in to_remove:
             grid.set_symbol(x, ".")
- 
+
     return answer

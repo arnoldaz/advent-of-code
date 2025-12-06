@@ -3,7 +3,7 @@ def parse_input(lines: list[str]) -> list[list[int]]:
     for line in lines:
         numbers = [int(x) for x in line]
         number_lists.append(numbers)
-        
+
     return number_lists
 
 def get_total_joltage(number_lists: list[list[int]], total_digits: int) -> int:
@@ -19,8 +19,8 @@ def get_total_joltage(number_lists: list[list[int]], total_digits: int) -> int:
             global_indices.append(corrent_index)
             answer += digit * (10 ** i)
             previous_index = corrent_index
-    
-    return answer   
+
+    return answer
 
 def silver_solution(lines: list[str]) -> int:
     number_lists = parse_input(lines)

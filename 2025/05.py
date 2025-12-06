@@ -32,25 +32,25 @@ def gold_solution(lines: list[str]) -> int:
     ranges = [Range(left, right) for left, right in old_ranges]
     parsed_ranges: list[Range] = []
 
-    for range in ranges:
-        answer += range.count()
+    for number_range in ranges:
+        answer += number_range.count()
 
         remove_parsed_range_indices: list[int] = []
         add_ranges: list[Range] = []
         for i, parsed_range in enumerate(parsed_ranges):
-            if (overlap := range.find_overlap(parsed_range)) is not None:
+            if (overlap := number_range.find_overlap(parsed_range)) is not None:
                 answer -= overlap.count()
                 remove_parsed_range_indices.append(i)
-                add_ranges.append(range)
+                add_ranges.append(number_range)
                 add_ranges += parsed_range.remove_overlapping_range(overlap)
 
         # print(f"{range=}, {parsed_ranges=}, {remove_parsed_range_indices=}, {add_ranges=}")
         remove_list_indexes(parsed_ranges, remove_parsed_range_indices)
         if len(add_ranges) == 0:
-            parsed_ranges.append(range)
+            parsed_ranges.append(number_range)
         else:
             parsed_ranges += add_ranges
-        
+
         parsed_ranges = list(set(parsed_ranges))
 
     return answer

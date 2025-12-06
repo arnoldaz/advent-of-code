@@ -108,4 +108,3 @@ class Grid[T]:
         for y in range(height):
             for x in range(width):
                 yield (Point2d(x, y), lines[y][x])
-
