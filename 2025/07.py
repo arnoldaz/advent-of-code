@@ -14,7 +14,7 @@ def silver_solution(lines: list[str]) -> int:
 
     running = True
     while running:
-        beams = set[Point2d]([Point2d(beam.x, beam.y+1) for beam in beams])
+        beams = set(Point2d(beam.x, beam.y+1) for beam in beams)
         for beam in beams:
             if not grid.in_bounds(beam):
                 running = False
@@ -53,4 +53,3 @@ def gold_solution(lines: list[str]) -> int:
     splitters = set(grid.find_all_character_instances("^"))
 
     return get_timelines(beam, splitters, grid.height())
-
