@@ -15,15 +15,11 @@ def get_distance_map(points: list[Point3d]) -> dict[float, tuple[Point3d, Point3
 
 def get_updated_circuits(circuits: list[set[Point3d]], point1: Point3d, point2: Point3d) -> list[set[Point3d]]:
     valid_circuits = [c for c in circuits if point1 in c or point2 in c]
-
     if not valid_circuits:
         return circuits + [{point1, point2}]
 
     merged_set = {point1, point2}.union(*valid_circuits)
-    updated_circuits = [c for c in circuits if c not in valid_circuits]
-    updated_circuits.append(merged_set)
-
-    return updated_circuits
+    return [c for c in circuits if c not in valid_circuits] + [merged_set]
 
 def silver_solution(lines: list[str]) -> int:
     points = parse_input(lines)
