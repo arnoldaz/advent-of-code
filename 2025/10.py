@@ -1,7 +1,6 @@
-# pylint: disable-all
-from itertools import combinations, product
+from itertools import combinations
 from typing import NamedTuple
-import sympy
+from z3 import Int, Optimize, sat, IntNumRef
 
 class Machine(NamedTuple):
     lights: list[bool]
@@ -36,7 +35,7 @@ def silver_solution(lines: list[str]) -> int:
                 if all(current_lights):
                     button_press_list.append(list(combination))
 
-        answer += len(min(button_press_list, key=lambda x: len(x)))
+        answer += len(min(button_press_list, key=len))
 
     return answer
 
@@ -44,39 +43,33 @@ def gold_solution(lines: list[str]) -> int:
     machines = parse_input(lines)
     answer = 0
 
-    xxx = 0
     for machine in machines:
-        print(xxx, len(machines))
-        xxx+=1
-        n = len(machine.buttons)
-        x = sympy.symbols(f"x0:{n}")
-        equations = []
+        variable_names = [f"x{i}" for i in range(len(machine.buttons))]
+        variables = [Int(name) for name in variable_names]
 
-        for i in range(len(machine.joltage_requirements)):
-            required_variables = []
-            for button_index, button in enumerate(machine.buttons):
-                if i in button:
-                    required_variables.append(button_index)
+        z3 = Optimize()
 
-            # print(i, required_variables, machine.joltage_requirements[i])
-            equations.append(sympy.Eq(sum(x[index] for index in required_variables), machine.joltage_requirements[i]))
+        for value in variables:
+            z3.add(value >= 0)
 
-        # print(equations)
-        solutions = sympy.linsolve(equations, x)
-        # print(solutions)
-        
-        parametric_solution = list(solutions)[0] # type: ignore
-        free_symbols = list(parametric_solution.free_symbols)
-        max_value = max(machine.joltage_requirements)
+        for i, joltage_requirement in enumerate(machine.joltage_requirements):
+            required_variables = [
+                button_index
+                for button_index, button in enumerate(machine.buttons)
+                if i in button
+            ]
 
-        concrete_solutions = []
-        for values in product(range(max_value + 1), repeat=len(free_symbols)):
-            subs_dict = dict(zip(free_symbols, values))
-            concrete_solution = [s.subs(subs_dict) for s in parametric_solution]
-            if all(value >= 0 for value in concrete_solution):
-                concrete_solutions.append(tuple(int(v) for v in concrete_solution))
+            z3.add(sum(variables[index] for index in required_variables) == joltage_requirement)
 
-        min_presses = min(sum(s) for s in concrete_solutions)
-        answer += min_presses
+        z3.minimize(sum(variables))
+
+        if z3.check() != sat:
+            return -1
+
+        model = z3.model()
+        for variable in variables:
+            variable_value = model.eval(variable, model_completion=True)
+            assert isinstance(variable_value, IntNumRef)
+            answer += variable_value.as_long()
 
     return answer
