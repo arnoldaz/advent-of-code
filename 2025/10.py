@@ -5,7 +5,7 @@ from z3 import Int, Optimize, sat, IntNumRef
 class Machine(NamedTuple):
     lights: list[bool]
     buttons: list[list[int]]
-    joltage_requirements: list[int]
+    joltages: list[int]
 
 def parse_input(lines: list[str]) -> list[Machine]:
     machines: list[Machine] = []
@@ -13,9 +13,9 @@ def parse_input(lines: list[str]) -> list[Machine]:
         first, *all_middle, last = line.split()
         lights = [symbol == "." for symbol in first.removeprefix("[").removesuffix("]")]
         buttons = [list(map(int, middle.removeprefix("(").removesuffix(")").split(","))) for middle in all_middle]
-        joltage_requirements = list(map(int, last.removeprefix("{").removesuffix("}").split(",")))
+        joltages = list(map(int, last.removeprefix("{").removesuffix("}").split(",")))
 
-        machines.append(Machine(lights, buttons, joltage_requirements))
+        machines.append(Machine(lights, buttons, joltages))
 
     return machines
 
@@ -49,18 +49,16 @@ def gold_solution(lines: list[str]) -> int:
 
         z3 = Optimize()
 
+        # All variables must be positive integers
         for value in variables:
             z3.add(value >= 0)
 
-        for i, joltage_requirement in enumerate(machine.joltage_requirements):
-            required_variables = [
-                button_index
-                for button_index, button in enumerate(machine.buttons)
-                if i in button
-            ]
+        # All joltage sums must be correct
+        for i, joltage in enumerate(machine.joltages):
+            required_variables = [button_index for button_index, button in enumerate(machine.buttons) if i in button]
+            z3.add(sum(variables[index] for index in required_variables) == joltage)
 
-            z3.add(sum(variables[index] for index in required_variables) == joltage_requirement)
-
+        # Variable sum should be minimal
         z3.minimize(sum(variables))
 
         if z3.check() != sat:
@@ -68,8 +66,8 @@ def gold_solution(lines: list[str]) -> int:
 
         model = z3.model()
         for variable in variables:
-            variable_value = model.eval(variable, model_completion=True)
-            assert isinstance(variable_value, IntNumRef)
-            answer += variable_value.as_long()
+            value = model.eval(variable, model_completion=True)
+            assert isinstance(value, IntNumRef)
+            answer += value.as_long()
 
     return answer
