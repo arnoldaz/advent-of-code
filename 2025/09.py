@@ -62,20 +62,20 @@ def gold_solution(lines: list[str]) -> int:
     long_segment1, long_segment2 = [segment for segment in polygon_segments if abs(segment.start.x - segment.end.x) > 50000]
     
     min_bad_y, max_bad_y = min(long_segment1.start.y, long_segment2.start.y), max(long_segment1.start.y, long_segment2.start.y)
-    print(min_bad_y, max_bad_y)
+    # print(min_bad_y, max_bad_y)
     
     test = []
     
-    print(len(points))
+    # print(len(points))
     
     i=0
     max_c = len(list(combinations(points, 2)))
     
     max_area = 0
     for point1, point2 in combinations(points, 2):
-        if i% 100 == 0:
-            print(f"{i} / {max_c}")
-        i+=1
+        # if i% 100 == 0:
+        #     print(f"{i} / {max_c}")
+        # i+=1
         
         width = abs(point1.x - point2.x) + 1
         height = abs(point1.y - point2.y) + 1
@@ -124,7 +124,7 @@ def gold_solution(lines: list[str]) -> int:
         
         max_area = max(max_area, area)
         test = [p1,p2,p3,p4]
-        print(p1, p2, p3, p4, area)
+        # print(p1, p2, p3, p4, area)
     
 
 
@@ -139,29 +139,29 @@ def gold_solution(lines: list[str]) -> int:
         #     print(p1, p2, p3, p4, area)
     
         
-    import numpy as np
-    from PIL import Image, ImageDraw
+    # import numpy as np
+    # from PIL import Image, ImageDraw
 
-    polygon_points =[(*(map(int,o.split(","))),)for o in open("i").readlines()]
+    # polygon_points =[(*(map(int,o.split(","))),)for o in open("i").readlines()]
 
-    # choose a reasonable output size (e.g., 4000 x 4000)
-    W, H = 4000, 4000  
+    # # choose a reasonable output size (e.g., 4000 x 4000)
+    # W, H = 4000, 4000  
 
-    # your real logical grid size
-    GRID_W, GRID_H = 100_000, 100_000
+    # # your real logical grid size
+    # GRID_W, GRID_H = 100_000, 100_000
 
-    # scale polygon coordinates
-    scale_x = W / GRID_W
-    scale_y = H / GRID_H
+    # # scale polygon coordinates
+    # scale_x = W / GRID_W
+    # scale_y = H / GRID_H
 
-    polygon = [(x * scale_x, y * scale_y) for (x, y) in polygon_points]
-    polygon2 = [(a.x * scale_x, a.y * scale_y) for a in test]
+    # polygon = [(x * scale_x, y * scale_y) for (x, y) in polygon_points]
+    # polygon2 = [(a.x * scale_x, a.y * scale_y) for a in test]
 
-    img = Image.new("RGB", (W, H), "white")
-    draw = ImageDraw.Draw(img)
-    draw.polygon(polygon, outline="black", fill="black")
-    draw.polygon(polygon2, outline="green", fill=None)
-    img.save("polygon.png")
+    # img = Image.new("RGB", (W, H), "white")
+    # draw = ImageDraw.Draw(img)
+    # draw.polygon(polygon, outline="black", fill="black")
+    # draw.polygon(polygon2, outline="green", fill=None)
+    # img.save("polygon.png")
     
     return max_area
     
