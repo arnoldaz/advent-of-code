@@ -1,7 +1,7 @@
 # pylint: disable-all
-
-from itertools import combinations
+from itertools import combinations, product
 from typing import NamedTuple
+import sympy
 
 class Machine(NamedTuple):
     lights: list[bool]
@@ -41,5 +41,42 @@ def silver_solution(lines: list[str]) -> int:
     return answer
 
 def gold_solution(lines: list[str]) -> int:
-    # Implement solution
-    return -321
+    machines = parse_input(lines)
+    answer = 0
+
+    xxx = 0
+    for machine in machines:
+        print(xxx, len(machines))
+        xxx+=1
+        n = len(machine.buttons)
+        x = sympy.symbols(f"x0:{n}")
+        equations = []
+
+        for i in range(len(machine.joltage_requirements)):
+            required_variables = []
+            for button_index, button in enumerate(machine.buttons):
+                if i in button:
+                    required_variables.append(button_index)
+
+            # print(i, required_variables, machine.joltage_requirements[i])
+            equations.append(sympy.Eq(sum(x[index] for index in required_variables), machine.joltage_requirements[i]))
+
+        # print(equations)
+        solutions = sympy.linsolve(equations, x)
+        # print(solutions)
+        
+        parametric_solution = list(solutions)[0] # type: ignore
+        free_symbols = list(parametric_solution.free_symbols)
+        max_value = max(machine.joltage_requirements)
+
+        concrete_solutions = []
+        for values in product(range(max_value + 1), repeat=len(free_symbols)):
+            subs_dict = dict(zip(free_symbols, values))
+            concrete_solution = [s.subs(subs_dict) for s in parametric_solution]
+            if all(value >= 0 for value in concrete_solution):
+                concrete_solutions.append(tuple(int(v) for v in concrete_solution))
+
+        min_presses = min(sum(s) for s in concrete_solutions)
+        answer += min_presses
+
+    return answer
