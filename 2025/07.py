@@ -6,30 +6,21 @@ def silver_solution(lines: list[str]) -> int:
     grid = Grid[str](lines)
     split_count = 0
 
-    beams = set([grid.find_first_character_instance("S")])
+    beams = {grid.find_first_character_instance("S")}
     splitters = set(grid.find_all_character_instances("^"))
-
-    beams_to_add = set[Point2d]()
-    beams_to_remove = set[Point2d]()
 
     running = True
     while running:
         beams = set(Point2d(beam.x, beam.y+1) for beam in beams)
-        for beam in beams:
+        for beam in beams.copy():
             if not grid.in_bounds(beam):
                 running = False
                 break
 
             if beam in splitters:
                 split_count += 1
-                beams_to_remove.add(beam)
-                beams_to_add.add(Point2d(beam.x-1, beam.y))
-                beams_to_add.add(Point2d(beam.x+1, beam.y))
-
-        beams -= beams_to_remove
-        beams |= beams_to_add
-        beams_to_add.clear()
-        beams_to_remove.clear()
+                beams -= {beam}
+                beams |= {Point2d(beam.x-1, beam.y), Point2d(beam.x+1, beam.y)}
 
     return split_count
 
