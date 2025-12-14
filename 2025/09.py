@@ -36,7 +36,7 @@ def gold_solution(lines: list[str]) -> int:
     # Draw polygon lines on the grid from the compressed points
     for point1, point2 in zip(compressed, compressed[1:] + compressed[:1]):
         # Vertical edges
-        if point1.x == point2.x: 
+        if point1.x == point2.x:
             for y in range(min(point1.y, point2.y), max(point1.y, point2.y)):
                 grid.set_symbol(Point2d(point1.x, y), "#")
 

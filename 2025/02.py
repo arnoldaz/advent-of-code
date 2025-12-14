@@ -1,4 +1,3 @@
-
 def parse_input(lines: list[str]) -> list[tuple[int, int]]:
     return [
         (int(start), int(end))
