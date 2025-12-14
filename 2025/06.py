@@ -20,7 +20,7 @@ def gold_solution(lines: list[str]) -> int:
     grid = Grid[str](lines)
     operations = lines[-1].split()
 
-    i = 0
+    operation_index = 0
     current_numbers: list[int] = []
     answer = 0
     for column in grid.get_columns(" "):
@@ -30,10 +30,10 @@ def gold_solution(lines: list[str]) -> int:
             combined_number = int("".join(map(str, numbers)))
             current_numbers.append(combined_number)
         else:
-            answer += perform_operation(current_numbers, operations[i])
-            i += 1
+            answer += perform_operation(current_numbers, operations[operation_index])
+            operation_index += 1
             current_numbers.clear()
 
-    answer += perform_operation(current_numbers, operations[i])
+    answer += perform_operation(current_numbers, operations[operation_index])
 
     return answer
