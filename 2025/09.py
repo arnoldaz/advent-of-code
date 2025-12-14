@@ -28,7 +28,7 @@ def gold_solution(lines: list[str]) -> int:
     x_map = {v: i for i, v in enumerate(xs)}
     y_map = {v: i for i, v in enumerate(ys)}
 
-    # Create compressed coordinates
+    # Create compressed coordinates representing indexes between the values instead of the values themselves
     compressed = [Point2d(x_map[point.x], y_map[point.y]) for point in points]
 
     grid = Grid.create_empty(".", max(point.x + 1 for point in compressed), max(point.y + 1 for point in compressed))
@@ -45,7 +45,7 @@ def gold_solution(lines: list[str]) -> int:
             for x in range(min(point1.x, point2.x), max(point1.x, point2.x)):
                 grid.set_symbol(Point2d(x, point1.y), "#")
 
-    # Assuming the input is clean and doesn't have peninsulas made only from walls, there should be an empty space on bot right of first wall
+    # Assuming the input is clean and doesn't have peninsulas made only from walls, there should be an empty space on bot right of the first corner
     inside_point = grid.find_first_character_instance("#") + Point2d(1, 1)
 
     def flood_fill(location: Point2d):
