@@ -88,3 +88,21 @@ class Range:
                 return Range(self.start, number - 1), Range(number, self.end)
             case SplitMode.NOT_INCLUDE:
                 return Range(self.start, number - 1), Range(number + 1, self.end)
+
+    @staticmethod
+    def combine_ranges(ranges_to_combine: list["Range"]) -> list["Range"]:
+        sorted_ranges = sorted(ranges_to_combine, key=lambda x: (x.start, x.end))
+
+        combined_ranges = [sorted_ranges[0]]
+        last_index = 0
+        for current_range in sorted_ranges[1:]:
+            if current_range.find_overlap(combined_ranges[last_index]) is None:
+                combined_ranges.append(current_range)
+                last_index += 1
+            else:
+                combined_ranges[last_index] = Range(
+                    combined_ranges[last_index].start,
+                    max(combined_ranges[last_index].end, current_range.end)
+                )
+
+        return combined_ranges
